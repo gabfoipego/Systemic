@@ -1,0 +1,7 @@
+frontend:
+  - frontend/**
+backend:
+  - backend/**
+docker:
+  - docker-compose.yml
+  - Dockerfile
