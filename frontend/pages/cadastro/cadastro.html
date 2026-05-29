@@ -1,0 +1,1466 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Automax — Criar Conta</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <style>
+        /* ── VARIÁVEIS E RESET ── */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --red-vivid:        #D42B2B;
+            --red-dark:         #A01E1E;
+            --red-glow:         rgba(212, 43, 43, 0.15);
+            --red-glow-strong:  rgba(212, 43, 43, 0.25);
+            --green:            #22c55e;
+            --green-glow:       rgba(34, 197, 94, 0.15);
+            --carbon:           #111214;
+            --carbon-mid:       #1C1E22;
+            --carbon-light:     #26292F;
+            --steel:            #3A3D44;
+            --chrome:           #C8CACF;
+            --chrome-dim:       #858890;
+            --off-white:        #ECEDEF;
+            --text-body:        #B8BAC0;
+            --text-dim:         #7A7D85;
+            --border-subtle:    rgba(255,255,255,0.07);
+            --border-focus:     rgba(212, 43, 43, 0.6);
+            --font-display:     'Barlow Condensed', sans-serif;
+            --font-body:        'Barlow', sans-serif;
+            --transition:       0.26s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        body {
+            font-family: var(--font-body);
+            background: var(--carbon);
+            color: var(--text-body);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        a { text-decoration: none; color: inherit; }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+        }
+
+        /* ── HEADER ── */
+        .header {
+            background: rgba(17, 18, 20, 0.9);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border-subtle);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 70px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            font-family: var(--font-display);
+            font-size: 1.8rem;
+            font-weight: 900;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+        .logo-auto { color: var(--off-white); }
+        .logo-max  { color: var(--red-vivid); }
+
+        .nav { display: flex; gap: 2rem; }
+        .nav-link {
+            font-size: .85rem;
+            font-weight: 600;
+            color: var(--chrome-dim);
+            text-transform: uppercase;
+            letter-spacing: .05em;
+            transition: var(--transition);
+        }
+        .nav-link:hover { color: var(--red-vivid); }
+
+        .btn-header {
+            padding: .5rem 1.25rem;
+            border-radius: 4px;
+            font-family: var(--font-display);
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: .9rem;
+            transition: var(--transition);
+        }
+        .btn-outline { border: 1.5px solid var(--steel); color: var(--off-white); margin-right: 10px; }
+        .btn-outline:hover { border-color: var(--red-vivid); color: var(--red-vivid); }
+
+        /* ── MAIN ── */
+        .main-content {
+            flex: 1;
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            padding: 3rem 1.5rem 4rem;
+            position: relative;
+        }
+
+        .bg-glow {
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at 30% 30%, rgba(212,43,43,0.06) 0%, transparent 55%),
+                        radial-gradient(circle at 80% 80%, rgba(212,43,43,0.04) 0%, transparent 40%);
+            pointer-events: none;
+        }
+
+        .cadastro-wrap {
+            width: 100%;
+            max-width: 1020px;
+            z-index: 1;
+        }
+
+        /* ── STEPPER ── */
+        .stepper {
+            display: flex;
+            align-items: center;
+            gap: 0;
+            margin-bottom: 2.5rem;
+        }
+
+        .step {
+            display: flex;
+            align-items: center;
+            gap: .75rem;
+            flex: 1;
+        }
+
+        .step-circle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 2px solid var(--steel);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--font-display);
+            font-weight: 800;
+            font-size: 1rem;
+            color: var(--text-dim);
+            background: var(--carbon-mid);
+            flex-shrink: 0;
+            transition: var(--transition);
+            position: relative;
+            z-index: 1;
+        }
+
+        .step-circle svg {
+            display: none;
+            width: 16px;
+            height: 16px;
+        }
+
+        .step-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .step-label {
+            font-family: var(--font-display);
+            font-size: .7rem;
+            font-weight: 700;
+            letter-spacing: .15em;
+            text-transform: uppercase;
+            color: var(--text-dim);
+            transition: var(--transition);
+        }
+
+        .step-title {
+            font-family: var(--font-display);
+            font-size: 1rem;
+            font-weight: 800;
+            color: var(--chrome-dim);
+            text-transform: uppercase;
+            transition: var(--transition);
+        }
+
+        .step-connector {
+            flex: 1;
+            height: 1px;
+            background: var(--steel);
+            margin: 0 1rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .step-connector::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: var(--red-vivid);
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Active step */
+        .step.is-active .step-circle {
+            border-color: var(--red-vivid);
+            color: var(--red-vivid);
+            background: var(--red-glow);
+            box-shadow: 0 0 0 4px var(--red-glow);
+        }
+        .step.is-active .step-label { color: var(--red-vivid); }
+        .step.is-active .step-title { color: var(--off-white); }
+
+        /* Done step */
+        .step.is-done .step-circle {
+            border-color: var(--green);
+            background: var(--green-glow);
+            color: transparent;
+        }
+        .step.is-done .step-circle span { display: none; }
+        .step.is-done .step-circle svg { display: block; stroke: var(--green); }
+        .step.is-done .step-label { color: var(--green); }
+        .step.is-done .step-title { color: var(--off-white); }
+        .step.is-done + .step-connector::after { transform: scaleX(1); }
+
+        /* ── CARD ── */
+        .card {
+            background: var(--carbon-mid);
+            border-radius: 12px;
+            border: 1px solid var(--border-subtle);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.4);
+            overflow: hidden;
+        }
+
+        .card-header {
+            padding: 2rem 2.5rem 1.5rem;
+            border-bottom: 1px solid var(--border-subtle);
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 1rem;
+        }
+
+        .card-eyebrow {
+            font-family: var(--font-display);
+            font-size: .7rem;
+            font-weight: 700;
+            letter-spacing: .2em;
+            color: var(--red-vivid);
+            margin-bottom: .5rem;
+            display: flex;
+            align-items: center;
+            gap: .6rem;
+            text-transform: uppercase;
+        }
+        .card-eyebrow::before { content: ''; width: 20px; height: 2px; background: var(--red-vivid); }
+
+        .card-title {
+            font-family: var(--font-display);
+            font-size: 1.8rem;
+            font-weight: 900;
+            color: var(--off-white);
+            text-transform: uppercase;
+        }
+
+        .card-desc {
+            font-size: .85rem;
+            color: var(--text-dim);
+            margin-top: .35rem;
+        }
+
+        .card-icon {
+            width: 52px;
+            height: 52px;
+            border-radius: 10px;
+            background: rgba(212,43,43,0.1);
+            border: 1px solid rgba(212,43,43,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .card-icon svg { stroke: var(--red-vivid); }
+
+        .card-body {
+            padding: 2rem 2.5rem;
+        }
+
+        /* ── FORM GRID ── */
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.25rem 1.5rem;
+        }
+
+        .form-grid .span-full { grid-column: 1 / -1; }
+
+        .am-field { display: flex; flex-direction: column; }
+
+        .am-label {
+            font-family: var(--font-display);
+            font-size: .75rem;
+            font-weight: 700;
+            color: var(--chrome-dim);
+            text-transform: uppercase;
+            letter-spacing: .1em;
+            display: block;
+            margin-bottom: .5rem;
+        }
+
+        .am-label .required {
+            color: var(--red-vivid);
+            margin-left: 2px;
+        }
+
+        .input-wrap {
+            position: relative;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: .85rem;
+            top: 50%;
+            transform: translateY(-50%);
+            pointer-events: none;
+            color: var(--text-dim);
+            transition: var(--transition);
+        }
+        .input-icon svg { display: block; }
+
+        .am-input {
+            width: 100%;
+            padding: .8rem 1rem .8rem 2.6rem;
+            background: #111214;
+            border: 1.5px solid rgba(255,255,255,0.08);
+            border-radius: 4px;
+            color: #fff;
+            font-family: var(--font-body);
+            font-size: .95rem;
+            outline: none;
+            transition: var(--transition);
+        }
+
+        .am-input::placeholder { color: var(--text-dim); }
+        .am-input:focus { border-color: var(--red-vivid); box-shadow: 0 0 0 3px var(--red-glow); }
+        .am-input:focus + .input-icon,
+        .input-wrap:focus-within .input-icon { color: var(--red-vivid); }
+
+        /* Input sem ícone */
+        .am-input.no-icon { padding-left: 1rem; }
+
+        /* Input com indicador de validade */
+        .am-input.is-valid { border-color: var(--green); }
+        .am-input.is-invalid { border-color: #ef4444; box-shadow: 0 0 0 3px rgba(239,68,68,0.15); }
+
+        .field-hint {
+            font-size: .75rem;
+            color: var(--text-dim);
+            margin-top: .4rem;
+        }
+
+        .field-error {
+            font-size: .75rem;
+            color: #ef4444;
+            margin-top: .4rem;
+            display: none;
+        }
+        .field-error.visible { display: block; }
+
+        /* Password toggle */
+        .input-action {
+            position: absolute;
+            right: .85rem;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--text-dim);
+            padding: 0;
+            display: flex;
+            align-items: center;
+            transition: var(--transition);
+        }
+        .input-action:hover { color: var(--chrome); }
+
+        /* ── FLASH MESSAGES ── */
+        .flash {
+            border-radius: 4px;
+            font-size: .85rem;
+            padding: .75rem 1rem;
+            margin-bottom: 1.5rem;
+            display: none;
+        }
+        .flash.visible { display: flex; align-items: center; gap: .6rem; }
+        .flash-error {
+            background: rgba(239,68,68,0.12);
+            border: 1px solid rgba(239,68,68,0.35);
+            color: #f87171;
+        }
+        .flash-success {
+            background: var(--green-glow);
+            border: 1px solid rgba(34,197,94,0.35);
+            color: var(--green);
+        }
+
+        /* ── PROGRESS BAR ── */
+        .form-progress {
+            height: 3px;
+            background: var(--carbon-light);
+            border-radius: 0 0 2px 2px;
+            overflow: hidden;
+        }
+        .form-progress-bar {
+            height: 100%;
+            background: var(--red-vivid);
+            width: 0%;
+            transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* ── CARD FOOTER / ACTIONS ── */
+        .card-footer {
+            padding: 1.5rem 2.5rem 2rem;
+            border-top: 1px solid var(--border-subtle);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+        }
+
+        .btn-back {
+            display: flex;
+            align-items: center;
+            gap: .5rem;
+            padding: .8rem 1.5rem;
+            border-radius: 4px;
+            border: 1.5px solid var(--steel);
+            background: transparent;
+            color: var(--chrome);
+            font-family: var(--font-display);
+            font-weight: 700;
+            font-size: .9rem;
+            text-transform: uppercase;
+            letter-spacing: .08em;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .btn-back:hover { border-color: var(--chrome-dim); }
+
+        .btn-next {
+            display: flex;
+            align-items: center;
+            gap: .5rem;
+            padding: .8rem 2rem;
+            border-radius: 4px;
+            background: var(--red-vivid);
+            color: #fff;
+            border: none;
+            font-family: var(--font-display);
+            font-weight: 800;
+            font-size: .95rem;
+            text-transform: uppercase;
+            letter-spacing: .1em;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .btn-next:hover { background: var(--red-dark); transform: translateY(-2px); box-shadow: 0 10px 20px rgba(212,43,43,0.2); }
+        .btn-next:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+        .btn-next .spinner { display: none; animation: spin 0.8s linear infinite; }
+        .btn-next.loading .spinner { display: block; }
+        .btn-next.loading .btn-text { display: none; }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ── SEÇÃO DE SUCESSO ── */
+        .success-view {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 3rem 2.5rem;
+        }
+        .success-view.visible { display: flex; }
+
+        .success-icon {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: var(--green-glow);
+            border: 2px solid var(--green);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+            animation: pop-in 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        @keyframes pop-in { from { transform: scale(0); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+        .success-title {
+            font-family: var(--font-display);
+            font-size: 2rem;
+            font-weight: 900;
+            color: var(--off-white);
+            text-transform: uppercase;
+            margin-bottom: .5rem;
+        }
+        .success-desc { font-size: .9rem; color: var(--text-dim); max-width: 380px; line-height: 1.6; margin-bottom: 2rem; }
+
+        .success-actions { display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; }
+
+        /* ── SEPARADOR DE SEÇÃO ── */
+        .section-divider {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin: 1.75rem 0 1.25rem;
+        }
+        .section-divider::before,
+        .section-divider::after { content: ''; flex: 1; height: 1px; background: var(--border-subtle); }
+        .section-divider-label {
+            font-family: var(--font-display);
+            font-size: .7rem;
+            font-weight: 700;
+            letter-spacing: .15em;
+            text-transform: uppercase;
+            color: var(--text-dim);
+            white-space: nowrap;
+        }
+
+        /* ── PASSWORD STRENGTH ── */
+        .password-strength {
+            display: flex;
+            gap: 4px;
+            margin-top: .5rem;
+        }
+        .strength-bar {
+            flex: 1;
+            height: 3px;
+            border-radius: 2px;
+            background: var(--steel);
+            transition: var(--transition);
+        }
+        .strength-bar.active-weak   { background: #ef4444; }
+        .strength-bar.active-medium { background: #f59e0b; }
+        .strength-bar.active-strong { background: var(--green); }
+
+        .strength-label {
+            font-size: .72rem;
+            color: var(--text-dim);
+            margin-top: .3rem;
+        }
+
+        /* ── CHECKBOX ── */
+        .checkbox-field {
+            display: flex;
+            align-items: flex-start;
+            gap: .75rem;
+            cursor: pointer;
+        }
+        .checkbox-field input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--red-vivid);
+            flex-shrink: 0;
+            margin-top: 2px;
+            cursor: pointer;
+        }
+        .checkbox-label { font-size: .85rem; color: var(--text-dim); line-height: 1.5; }
+        .checkbox-label a { color: var(--red-vivid); }
+        .checkbox-label a:hover { text-decoration: underline; }
+
+        /* ── LOGIN LINK ── */
+        .login-link {
+            text-align: center;
+            margin-top: 1.5rem;
+            font-size: .85rem;
+            color: var(--text-dim);
+        }
+        .login-link a { color: var(--red-vivid); font-weight: 600; }
+        .login-link a:hover { text-decoration: underline; }
+
+        /* ── FOOTER ── */
+        .footer {
+            background: #0A0B0C;
+            padding: 3rem 0 1.5rem;
+            border-top: 1px solid var(--border-subtle);
+            color: var(--text-dim);
+        }
+        .footer-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 2rem; margin-bottom: 2rem; }
+        .footer-title { font-family: var(--font-display); color: var(--off-white); text-transform: uppercase; margin-bottom: 1rem; font-size: 1.1rem; }
+        .footer-text { font-size: .85rem; line-height: 1.6; margin-bottom: 0.5rem; }
+        .footer-bottom { border-top: 1px solid var(--border-subtle); padding-top: 1.5rem; text-align: center; font-size: .75rem; }
+
+        /* ── RESPONSIVIDADE ── */
+        @media (max-width: 700px) {
+            .form-grid { grid-template-columns: 1fr; }
+            .form-grid .span-full { grid-column: auto; }
+            .card-header { flex-direction: column; }
+            .card-header, .card-body, .card-footer { padding-left: 1.5rem; padding-right: 1.5rem; }
+            .step-info { display: none; }
+            .step-connector { margin: 0 .5rem; }
+            .card-footer { flex-direction: column-reverse; }
+            .btn-back, .btn-next { width: 100%; justify-content: center; }
+        }
+        @media (max-width: 500px) {
+            .nav { display: none; }
+        }
+
+        /* ── ANIMAÇÃO SLIDE ── */
+        .form-pane {
+            animation: slide-in 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        @keyframes slide-in {
+            from { opacity: 0; transform: translateX(20px); }
+            to   { opacity: 1; transform: translateX(0); }
+        }
+        .form-pane.slide-out {
+            animation: slide-out 0.25s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+        @keyframes slide-out {
+            to { opacity: 0; transform: translateX(-20px); }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ── HEADER ── -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <a href="/" class="logo">
+                    <span class="logo-auto">AUTO</span><span class="logo-max">MAX</span>
+                </a>
+                <nav class="nav">
+                    <a href="/" class="nav-link">Início</a>
+                    <a href="/servicos" class="nav-link">Serviços</a>
+                    <a href="/produtos" class="nav-link">Produtos</a>
+                </nav>
+                <div>
+                    <a href="/auth/login" class="btn-header btn-outline">Entrar</a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- ── CONTEÚDO PRINCIPAL ── -->
+    <main class="main-content">
+        <div class="bg-glow"></div>
+
+        <div class="cadastro-wrap">
+
+            <!-- STEPPER -->
+            <nav class="stepper" aria-label="Etapas do cadastro">
+                <div class="step is-active" id="step-1" aria-current="step">
+                    <div class="step-circle">
+                        <span>1</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+                    </div>
+                    <div class="step-info">
+                        <span class="step-label">Etapa 1</span>
+                        <span class="step-title">Seus Dados</span>
+                    </div>
+                </div>
+                <div class="step-connector" id="connector-1" aria-hidden="true"></div>
+                <div class="step" id="step-2">
+                    <div class="step-circle">
+                        <span>2</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+                    </div>
+                    <div class="step-info">
+                        <span class="step-label">Etapa 2</span>
+                        <span class="step-title">Seu Veículo</span>
+                    </div>
+                </div>
+                <div class="step-connector" id="connector-2" aria-hidden="true"></div>
+                <div class="step" id="step-3">
+                    <div class="step-circle">
+                        <span>3</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+                    </div>
+                    <div class="step-info">
+                        <span class="step-label">Etapa 3</span>
+                        <span class="step-title">Confirmação</span>
+                    </div>
+                </div>
+            </nav>
+
+            <!-- CARD -->
+            <div class="card" id="main-card">
+                <div class="form-progress" aria-hidden="true">
+                    <div class="form-progress-bar" id="progress-bar" style="width: 33%"></div>
+                </div>
+
+                <!-- ═══ PANE 1: DADOS DO CLIENTE ═══ -->
+                <div id="pane-1" class="form-pane">
+                    <div class="card-header">
+                        <div>
+                            <p class="card-eyebrow">Conta de Cliente</p>
+                            <h1 class="card-title">Dados Pessoais</h1>
+                            <p class="card-desc">Preencha seus dados para criar sua conta na Automax.</p>
+                        </div>
+                        <div class="card-icon" aria-hidden="true">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                        </div>
+                    </div>
+
+                    <div class="card-body">
+                        <div id="flash-1" class="flash flash-error" role="alert"></div>
+
+                        <div class="form-grid">
+                            <!-- Nome completo -->
+                            <div class="am-field span-full">
+                                <label class="am-label" for="nome_cliente">Nome completo <span class="required">*</span></label>
+                                <div class="input-wrap">
+                                    <span class="input-icon">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                                    </span>
+                                    <input
+                                        class="am-input"
+                                        type="text"
+                                        id="nome_cliente"
+                                        name="nome_cliente"
+                                        placeholder="Ex: João da Silva"
+                                        autocomplete="name"
+                                        required
+                                        maxlength="255"
+                                    >
+                                </div>
+                                <span class="field-error" id="err-nome">Informe seu nome completo.</span>
+                            </div>
+
+                            <!-- CPF -->
+                            <div class="am-field">
+                                <label class="am-label" for="cpf">CPF <span class="required">*</span></label>
+                                <div class="input-wrap">
+                                    <span class="input-icon">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                                    </span>
+                                    <input
+                                        class="am-input"
+                                        type="text"
+                                        id="cpf"
+                                        name="cpf"
+                                        placeholder="000.000.000-00"
+                                        autocomplete="off"
+                                        required
+                                        maxlength="14"
+                                        inputmode="numeric"
+                                    >
+                                </div>
+                                <span class="field-error" id="err-cpf">CPF inválido.</span>
+                            </div>
+
+                            <!-- Celular -->
+                            <div class="am-field">
+                                <label class="am-label" for="celular">Celular / WhatsApp <span class="required">*</span></label>
+                                <div class="input-wrap">
+                                    <span class="input-icon">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12.18 19.79 19.79 0 0 1 1.61 3.6 2 2 0 0 1 3.6 1.44h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L7.91 9.09a16 16 0 0 0 6 6l.91-1.91a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 21.44 15l.48.92z"/></svg>
+                                    </span>
+                                    <input
+                                        class="am-input"
+                                        type="tel"
+                                        id="celular"
+                                        name="celular"
+                                        placeholder="(47) 99999-9999"
+                                        autocomplete="tel"
+                                        required
+                                        maxlength="20"
+                                        inputmode="tel"
+                                    >
+                                </div>
+                                <span class="field-error" id="err-celular">Número de celular inválido.</span>
+                            </div>
+
+                            <!-- Email -->
+                            <div class="am-field span-full">
+                                <label class="am-label" for="email">E-mail <span class="required">*</span></label>
+                                <div class="input-wrap">
+                                    <span class="input-icon">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                                    </span>
+                                    <input
+                                        class="am-input"
+                                        type="email"
+                                        id="email"
+                                        name="email"
+                                        placeholder="seuemail@exemplo.com"
+                                        autocomplete="email"
+                                        required
+                                        maxlength="255"
+                                    >
+                                </div>
+                                <span class="field-error" id="err-email">Informe um e-mail válido.</span>
+                            </div>
+
+                            <!-- Senha -->
+                            <div class="am-field">
+                                <label class="am-label" for="senha">Senha <span class="required">*</span></label>
+                                <div class="input-wrap">
+                                    <span class="input-icon">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                                    </span>
+                                    <input
+                                        class="am-input"
+                                        type="password"
+                                        id="senha"
+                                        name="senha"
+                                        placeholder="Mínimo 8 caracteres"
+                                        autocomplete="new-password"
+                                        required
+                                        minlength="8"
+                                    >
+                                    <button type="button" class="input-action" id="toggle-senha" aria-label="Mostrar/ocultar senha">
+                                        <svg id="eye-senha" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                                    </button>
+                                </div>
+                                <div class="password-strength" id="strength-bars" aria-hidden="true">
+                                    <div class="strength-bar" id="bar-1"></div>
+                                    <div class="strength-bar" id="bar-2"></div>
+                                    <div class="strength-bar" id="bar-3"></div>
+                                    <div class="strength-bar" id="bar-4"></div>
+                                </div>
+                                <span class="strength-label" id="strength-label" aria-live="polite"></span>
+                                <span class="field-error" id="err-senha">A senha deve ter no mínimo 8 caracteres.</span>
+                            </div>
+
+                            <!-- Confirmar Senha -->
+                            <div class="am-field">
+                                <label class="am-label" for="confirmar_senha">Confirmar Senha <span class="required">*</span></label>
+                                <div class="input-wrap">
+                                    <span class="input-icon">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                                    </span>
+                                    <input
+                                        class="am-input"
+                                        type="password"
+                                        id="confirmar_senha"
+                                        name="confirmar_senha"
+                                        placeholder="Repita a senha"
+                                        autocomplete="new-password"
+                                        required
+                                    >
+                                    <button type="button" class="input-action" id="toggle-confirmar" aria-label="Mostrar/ocultar confirmação de senha">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                                    </button>
+                                </div>
+                                <span class="field-error" id="err-confirmar">As senhas não coincidem.</span>
+                            </div>
+
+                            <!-- Termos -->
+                            <div class="am-field span-full" style="margin-top: .25rem;">
+                                <label class="checkbox-field">
+                                    <input type="checkbox" id="aceitar_termos" name="aceitar_termos" required>
+                                    <span class="checkbox-label">
+                                        Li e aceito os <a href="/termos" target="_blank">Termos de Uso</a>
+                                        e a <a href="/privacidade" target="_blank">Política de Privacidade</a>
+                                        da Automax.
+                                    </span>
+                                </label>
+                                <span class="field-error" id="err-termos">Você precisa aceitar os termos para continuar.</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card-footer">
+                        <div></div>
+                        <button type="button" class="btn-next" id="btn-next-1">
+                            <span class="btn-text">Próximo: Veículo</span>
+                            <svg class="spinner" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+                            <svg class="btn-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                        </button>
+                    </div>
+
+                    <div class="login-link">
+                        Já tem uma conta? <a href="/auth/login">Entrar agora</a>
+                    </div>
+                </div>
+
+                <!-- ═══ PANE 2: DADOS DO VEÍCULO ═══ -->
+                <div id="pane-2" class="form-pane" style="display:none">
+                    <div class="card-header">
+                        <div>
+                            <p class="card-eyebrow">Cadastro de Veículo</p>
+                            <h2 class="card-title">Seu Veículo</h2>
+                            <p class="card-desc">Cadastre o veículo que você vai trazer para a oficina.</p>
+                        </div>
+                        <div class="card-icon" aria-hidden="true">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+                        </div>
+                    </div>
+
+                    <div class="card-body">
+                        <div id="flash-2" class="flash flash-error" role="alert"></div>
+
+                        <div class="form-grid">
+                            <!-- Marca -->
+                            <div class="am-field">
+                                <label class="am-label" for="marca">Marca <span class="required">*</span></label>
+                                <div class="input-wrap">
+                                    <span class="input-icon">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+                                    </span>
+                                    <input
+                                        class="am-input"
+                                        type="text"
+                                        id="marca"
+                                        name="marca"
+                                        placeholder="Ex: Toyota, Volkswagen, Fiat..."
+                                        required
+                                        maxlength="100"
+                                        list="marcas-list"
+                                    >
+                                    <datalist id="marcas-list">
+                                        <option value="Acura"><option value="Alfa Romeo"><option value="Audi">
+                                        <option value="BMW"><option value="Caoa Chery"><option value="Chevrolet">
+                                        <option value="Chrysler"><option value="Citroën"><option value="Dodge">
+                                        <option value="Ferrari"><option value="Fiat"><option value="Ford">
+                                        <option value="Honda"><option value="Hyundai"><option value="JAC">
+                                        <option value="Jaguar"><option value="Jeep"><option value="Kia">
+                                        <option value="Lamborghini"><option value="Land Rover"><option value="Lexus">
+                                        <option value="Maserati"><option value="Mazda"><option value="Mercedes-Benz">
+                                        <option value="Mini"><option value="Mitsubishi"><option value="Nissan">
+                                        <option value="Peugeot"><option value="Porsche"><option value="RAM">
+                                        <option value="Renault"><option value="Subaru"><option value="Suzuki">
+                                        <option value="Toyota"><option value="Volkswagen"><option value="Volvo">
+                                    </datalist>
+                                </div>
+                                <span class="field-error" id="err-marca">Informe a marca do veículo.</span>
+                            </div>
+
+                            <!-- Modelo -->
+                            <div class="am-field">
+                                <label class="am-label" for="modelo">Modelo <span class="required">*</span></label>
+                                <div class="input-wrap">
+                                    <span class="input-icon">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                                    </span>
+                                    <input
+                                        class="am-input"
+                                        type="text"
+                                        id="modelo"
+                                        name="modelo"
+                                        placeholder="Ex: Corolla, Gol, Uno..."
+                                        required
+                                        maxlength="100"
+                                    >
+                                </div>
+                                <span class="field-error" id="err-modelo">Informe o modelo do veículo.</span>
+                            </div>
+
+                            <!-- Ano -->
+                            <div class="am-field">
+                                <label class="am-label" for="ano">Ano <span class="required">*</span></label>
+                                <div class="input-wrap">
+                                    <span class="input-icon">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                                    </span>
+                                    <input
+                                        class="am-input"
+                                        type="text"
+                                        id="ano"
+                                        name="ano"
+                                        placeholder="Ex: 2023 ou 2022/2023"
+                                        required
+                                        maxlength="10"
+                                        inputmode="numeric"
+                                    >
+                                </div>
+                                <span class="field-hint">Ano de fabricação/modelo (ex: 2023 ou 2022/2023)</span>
+                                <span class="field-error" id="err-ano">Informe um ano válido.</span>
+                            </div>
+
+                            <!-- Cor -->
+                            <div class="am-field">
+                                <label class="am-label" for="cor">Cor <span class="required">*</span></label>
+                                <div class="input-wrap">
+                                    <span class="input-icon">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="13.5" cy="6.5" r=".5"/><circle cx="17.5" cy="10.5" r=".5"/><circle cx="8.5" cy="7.5" r=".5"/><circle cx="6.5" cy="12.5" r=".5"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/></svg>
+                                    </span>
+                                    <input
+                                        class="am-input"
+                                        type="text"
+                                        id="cor"
+                                        name="cor"
+                                        placeholder="Ex: Branco, Prata, Preto..."
+                                        required
+                                        maxlength="50"
+                                        list="cores-list"
+                                    >
+                                    <datalist id="cores-list">
+                                        <option value="Branco"><option value="Preto"><option value="Prata">
+                                        <option value="Cinza"><option value="Vermelho"><option value="Azul">
+                                        <option value="Verde"><option value="Amarelo"><option value="Laranja">
+                                        <option value="Bege"><option value="Dourado"><option value="Vinho">
+                                        <option value="Bronze"><option value="Marrom">
+                                    </datalist>
+                                </div>
+                                <span class="field-error" id="err-cor">Informe a cor do veículo.</span>
+                            </div>
+
+                            <!-- Placa -->
+                            <div class="am-field span-full">
+                                <label class="am-label" for="placa">Placa <span class="required">*</span></label>
+                                <div class="input-wrap">
+                                    <span class="input-icon">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+                                    </span>
+                                    <input
+                                        class="am-input"
+                                        type="text"
+                                        id="placa"
+                                        name="placa"
+                                        placeholder="ABC-1234 ou ABC1D23"
+                                        required
+                                        maxlength="20"
+                                        style="text-transform: uppercase;"
+                                    >
+                                </div>
+                                <span class="field-hint">Formato antigo: ABC-1234 · Mercosul: ABC1D23</span>
+                                <span class="field-error" id="err-placa">Placa inválida. Use o formato correto.</span>
+                            </div>
+                        </div>
+
+                        <div class="section-divider" aria-hidden="true">
+                            <span class="section-divider-label">Você pode adicionar mais veículos depois</span>
+                        </div>
+                    </div>
+
+                    <div class="card-footer">
+                        <button type="button" class="btn-back" id="btn-back-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+                            Voltar
+                        </button>
+                        <button type="button" class="btn-next" id="btn-next-2">
+                            <span class="btn-text">Criar Minha Conta</span>
+                            <svg class="spinner" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+                            <svg class="btn-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- ═══ PANE 3: SUCESSO ═══ -->
+                <div id="pane-3" style="display:none">
+                    <div class="success-view visible">
+                        <div class="success-icon" aria-hidden="true">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="stroke: var(--green);"><polyline points="20 6 9 17 4 12"/></svg>
+                        </div>
+                        <h2 class="success-title">Conta Criada!</h2>
+                        <p class="success-desc">
+                            Bem-vindo à Automax! Sua conta e veículo foram cadastrados com sucesso.
+                            Agora você pode acompanhar suas ordens de serviço.
+                        </p>
+                        <div class="success-actions">
+                            <a href="/auth/login" class="btn-next" style="text-decoration:none;">
+                                Acessar minha conta
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+            </div><!-- /card -->
+        </div><!-- /cadastro-wrap -->
+    </main>
+
+    <!-- ── FOOTER ── -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div>
+                    <h3 class="footer-title">Automax</h3>
+                    <p class="footer-text">Referência em manutenção automotiva e peças de alta performance em Joinville.</p>
+                </div>
+                <div>
+                    <h4 class="footer-title" style="font-size: 0.9rem;">Contato</h4>
+                    <p class="footer-text">Tel: (47) 3333-4444</p>
+                    <p class="footer-text">Email: contato@automax.com.br</p>
+                </div>
+                <div>
+                    <h4 class="footer-title" style="font-size: 0.9rem;">Horário</h4>
+                    <p class="footer-text">Seg - Sex: 08h às 18h</p>
+                    <p class="footer-text">Sáb: 08h às 12h</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 Automax Performance. Todos os direitos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        'use strict';
+
+        // ── ESTADO GLOBAL ────────────────────────────────────────────────────
+        let current_pane = 1;
+
+        // ── UTILITÁRIOS DE DOM ───────────────────────────────────────────────
+        const get  = (id)  => document.getElementById(id);
+        const show_error = (id, msg = null) => {
+            const el = get(id);
+            if (!el) return;
+            if (msg) el.textContent = msg;
+            el.classList.add('visible');
+        };
+        const hide_error = (id) => get(id)?.classList.remove('visible');
+        const mark_valid   = (input) => { input.classList.add('is-valid'); input.classList.remove('is-invalid'); };
+        const mark_invalid = (input) => { input.classList.add('is-invalid'); input.classList.remove('is-valid'); };
+        const mark_neutral = (input) => { input.classList.remove('is-valid', 'is-invalid'); };
+
+        // ── FORMATAÇÃO DE CPF ────────────────────────────────────────────────
+        function format_cpf(value) {
+            const digits = value.replace(/\D/g, '').slice(0, 11);
+            return digits
+                .replace(/(\d{3})(\d)/, '$1.$2')
+                .replace(/(\d{3})\.(\d{3})(\d)/, '$1.$2.$3')
+                .replace(/\.(\d{3})(\d)/, '.$1-$2');
+        }
+
+        function validate_cpf(cpf) {
+            const digits = cpf.replace(/\D/g, '');
+            if (digits.length !== 11 || /^(\d)\1+$/.test(digits)) return false;
+
+            const calc_digit = (slice, factor) => {
+                const sum = slice.split('').reduce((acc, d, i) => acc + Number(d) * (factor - i), 0);
+                const rest = (sum * 10) % 11;
+                return rest >= 10 ? 0 : rest;
+            };
+
+            const d1 = calc_digit(digits.slice(0, 9), 10);
+            const d2 = calc_digit(digits.slice(0, 10), 11);
+            return d1 === Number(digits[9]) && d2 === Number(digits[10]);
+        }
+
+        // ── FORMATAÇÃO DE CELULAR ────────────────────────────────────────────
+        function format_celular(value) {
+            const digits = value.replace(/\D/g, '').slice(0, 11);
+            if (digits.length <= 2)  return digits.replace(/(\d+)/, '($1');
+            if (digits.length <= 7)  return digits.replace(/(\d{2})(\d+)/, '($1) $2');
+            if (digits.length <= 10) return digits.replace(/(\d{2})(\d{4})(\d+)/, '($1) $2-$3');
+            return digits.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
+        }
+
+        function validate_celular(value) {
+            const digits = value.replace(/\D/g, '');
+            return digits.length >= 10 && digits.length <= 11;
+        }
+
+        // ── FORMATAÇÃO DE PLACA ──────────────────────────────────────────────
+        function format_placa(value) {
+            const clean = value.replace(/[^a-zA-Z0-9]/g, '').toUpperCase().slice(0, 7);
+            if (clean.length > 3) {
+                return clean.slice(0, 3) + '-' + clean.slice(3);
+            }
+            return clean;
+        }
+
+        function validate_placa(value) {
+            const clean = value.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
+            const old_format     = /^[A-Z]{3}\d{4}$/;       // ABC1234
+            const mercosul_format = /^[A-Z]{3}\d[A-Z]\d{2}$/; // ABC1D23
+            return old_format.test(clean) || mercosul_format.test(clean);
+        }
+
+        // ── FORÇA DA SENHA ───────────────────────────────────────────────────
+        function calc_password_strength(password) {
+            let score = 0;
+            if (password.length >= 8)  score++;
+            if (password.length >= 12) score++;
+            if (/[A-Z]/.test(password) && /[a-z]/.test(password)) score++;
+            if (/\d/.test(password))   score++;
+            if (/[^a-zA-Z0-9]/.test(password)) score++;
+            return Math.min(Math.ceil(score * 4 / 5), 4);
+        }
+
+        const STRENGTH_LABELS  = ['', 'Fraca', 'Razoável', 'Boa', 'Forte'];
+        const STRENGTH_CLASSES = ['', 'active-weak', 'active-medium', 'active-strong', 'active-strong'];
+
+        function update_strength_ui(password) {
+            const level = password.length === 0 ? 0 : calc_password_strength(password);
+            const bars  = [get('bar-1'), get('bar-2'), get('bar-3'), get('bar-4')];
+
+            bars.forEach((bar, i) => {
+                bar.className = 'strength-bar';
+                if (i < level) bar.classList.add(STRENGTH_CLASSES[level]);
+            });
+
+            const label = get('strength-label');
+            label.textContent = password.length === 0 ? '' : `Força: ${STRENGTH_LABELS[level]}`;
+        }
+
+        // ── TOGGLE SENHA ─────────────────────────────────────────────────────
+        function setup_password_toggle(btn_id, input_id) {
+            const btn   = get(btn_id);
+            const input = get(input_id);
+            if (!btn || !input) return;
+
+            btn.addEventListener('click', () => {
+                const is_text = input.type === 'text';
+                input.type = is_text ? 'password' : 'text';
+                btn.setAttribute('aria-label', is_text ? 'Mostrar senha' : 'Ocultar senha');
+                btn.innerHTML = is_text
+                    ? `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>`
+                    : `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>`;
+            });
+        }
+
+        // ── NAVEGAÇÃO ENTRE PANES ────────────────────────────────────────────
+        function go_to_pane(target) {
+            const from = get(`pane-${current_pane}`);
+            from.classList.add('slide-out');
+            setTimeout(() => {
+                from.style.display = 'none';
+                from.classList.remove('slide-out');
+                const to = get(`pane-${target}`);
+                to.style.display = 'block';
+                current_pane = target;
+                update_stepper(target);
+                update_progress(target);
+                to.querySelector('input')?.focus();
+            }, 220);
+        }
+
+        function update_stepper(pane) {
+            for (let i = 1; i <= 3; i++) {
+                const step = get(`step-${i}`);
+                step.classList.remove('is-active', 'is-done');
+                if (i < pane)  step.classList.add('is-done');
+                if (i === pane) step.classList.add('is-active');
+            }
+        }
+
+        function update_progress(pane) {
+            const widths = { 1: '33%', 2: '66%', 3: '100%' };
+            get('progress-bar').style.width = widths[pane] ?? '0%';
+        }
+
+        // ── VALIDAÇÃO PANE 1 ─────────────────────────────────────────────────
+        function validate_pane_1() {
+            let ok = true;
+
+            // Nome
+            const nome = get('nome_cliente');
+            if (nome.value.trim().length < 3) {
+                mark_invalid(nome); show_error('err-nome', 'Informe seu nome completo (mínimo 3 caracteres).');
+                ok = false;
+            } else { mark_valid(nome); hide_error('err-nome'); }
+
+            // CPF
+            const cpf_input = get('cpf');
+            if (!validate_cpf(cpf_input.value)) {
+                mark_invalid(cpf_input); show_error('err-cpf', 'CPF inválido. Verifique os dígitos.');
+                ok = false;
+            } else { mark_valid(cpf_input); hide_error('err-cpf'); }
+
+            // Celular
+            const cel = get('celular');
+            if (!validate_celular(cel.value)) {
+                mark_invalid(cel); show_error('err-celular', 'Número de celular inválido.');
+                ok = false;
+            } else { mark_valid(cel); hide_error('err-celular'); }
+
+            // Email
+            const email_input = get('email');
+            const email_re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!email_re.test(email_input.value.trim())) {
+                mark_invalid(email_input); show_error('err-email', 'Informe um e-mail válido.');
+                ok = false;
+            } else { mark_valid(email_input); hide_error('err-email'); }
+
+            // Senha
+            const senha_input = get('senha');
+            if (senha_input.value.length < 8) {
+                mark_invalid(senha_input); show_error('err-senha', 'A senha deve ter no mínimo 8 caracteres.');
+                ok = false;
+            } else { mark_valid(senha_input); hide_error('err-senha'); }
+
+            // Confirmar senha
+            const confirmar = get('confirmar_senha');
+            if (confirmar.value !== senha_input.value || confirmar.value.length === 0) {
+                mark_invalid(confirmar); show_error('err-confirmar', 'As senhas não coincidem.');
+                ok = false;
+            } else { mark_valid(confirmar); hide_error('err-confirmar'); }
+
+            // Termos
+            const termos = get('aceitar_termos');
+            if (!termos.checked) {
+                show_error('err-termos', 'Você precisa aceitar os termos para continuar.');
+                ok = false;
+            } else { hide_error('err-termos'); }
+
+            return ok;
+        }
+
+        // ── VALIDAÇÃO PANE 2 ─────────────────────────────────────────────────
+        function validate_pane_2() {
+            let ok = true;
+
+            const marca = get('marca');
+            if (marca.value.trim().length < 2) {
+                mark_invalid(marca); show_error('err-marca', 'Informe a marca do veículo.');
+                ok = false;
+            } else { mark_valid(marca); hide_error('err-marca'); }
+
+            const modelo = get('modelo');
+            if (modelo.value.trim().length < 2) {
+                mark_invalid(modelo); show_error('err-modelo', 'Informe o modelo do veículo.');
+                ok = false;
+            } else { mark_valid(modelo); hide_error('err-modelo'); }
+
+            const ano_input = get('ano');
+            const ano_re = /^(19|20)\d{2}(\/\d{2,4})?$/;
+            if (!ano_re.test(ano_input.value.trim())) {
+                mark_invalid(ano_input); show_error('err-ano', 'Informe um ano válido (ex: 2023 ou 2022/2023).');
+                ok = false;
+            } else { mark_valid(ano_input); hide_error('err-ano'); }
+
+            const cor = get('cor');
+            if (cor.value.trim().length < 2) {
+                mark_invalid(cor); show_error('err-cor', 'Informe a cor do veículo.');
+                ok = false;
+            } else { mark_valid(cor); hide_error('err-cor'); }
+
+            const placa = get('placa');
+            if (!validate_placa(placa.value)) {
+                mark_invalid(placa); show_error('err-placa', 'Placa inválida. Use ABC-1234 ou ABC1D23.');
+                ok = false;
+            } else { mark_valid(placa); hide_error('err-placa'); }
+
+            return ok;
+        }
+
+        // ── SUBMIT: MONTAR PAYLOAD E ENVIAR ─────────────────────────────────
+        async function submit_cadastro() {
+            const btn = get('btn-next-2');
+            btn.classList.add('loading');
+            btn.disabled = true;
+
+            const payload = {
+                cliente: {
+                    nome_cliente: get('nome_cliente').value.trim(),
+                    cpf:          get('cpf').value.replace(/\D/g, ''),
+                    celular:      get('celular').value,
+                    email:        get('email').value.trim(),
+                    senha:        get('senha').value,
+                },
+                veiculo: {
+                    marca:  get('marca').value.trim(),
+                    modelo: get('modelo').value.trim(),
+                    ano:    get('ano').value.trim(),
+                    cor:    get('cor').value.trim(),
+                    placa:  get('placa').value.replace(/[^a-zA-Z0-9]/g, '').toUpperCase(),
+                }
+            };
+
+            try {
+                const response = await fetch('/cadastro/criar', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload),
+                });
+
+                const data = await response.json().catch(() => ({}));
+
+                if (response.ok) {
+                    go_to_pane(3);
+                } else {
+                    const flash = get('flash-2');
+                    flash.textContent = data.message ?? 'Erro ao criar conta. Tente novamente.';
+                    flash.classList.add('visible');
+                }
+            } catch {
+                const flash = get('flash-2');
+                flash.textContent = 'Erro de conexão. Verifique sua internet e tente novamente.';
+                flash.classList.add('visible');
+            } finally {
+                btn.classList.remove('loading');
+                btn.disabled = false;
+            }
+        }
+
+        // ── INICIALIZAÇÃO ────────────────────────────────────────────────────
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // Máscaras de input
+            get('cpf').addEventListener('input', (e) => {
+                e.target.value = format_cpf(e.target.value);
+            });
+
+            get('celular').addEventListener('input', (e) => {
+                e.target.value = format_celular(e.target.value);
+            });
+
+            get('placa').addEventListener('input', (e) => {
+                e.target.value = format_placa(e.target.value);
+            });
+
+            // Força da senha
+            get('senha').addEventListener('input', (e) => {
+                update_strength_ui(e.target.value);
+                // Revalida confirmação em tempo real se já foi preenchida
+                const confirmar = get('confirmar_senha');
+                if (confirmar.value.length > 0) {
+                    if (confirmar.value === e.target.value) {
+                        mark_valid(confirmar); hide_error('err-confirmar');
+                    } else {
+                        mark_invalid(confirmar); show_error('err-confirmar', 'As senhas não coincidem.');
+                    }
+                }
+            });
+
+            get('confirmar_senha').addEventListener('input', (e) => {
+                const senha_val = get('senha').value;
+                if (e.target.value === senha_val) {
+                    mark_valid(e.target); hide_error('err-confirmar');
+                } else {
+                    mark_invalid(e.target); show_error('err-confirmar', 'As senhas não coincidem.');
+                }
+            });
+
+            // Toggles de senha
+            setup_password_toggle('toggle-senha', 'senha');
+            setup_password_toggle('toggle-confirmar', 'confirmar_senha');
+
+            // Botão: avançar pane 1 → 2
+            get('btn-next-1').addEventListener('click', () => {
+                if (validate_pane_1()) go_to_pane(2);
+            });
+
+            // Botão: voltar pane 2 → 1
+            get('btn-back-2').addEventListener('click', () => go_to_pane(1));
+
+            // Botão: submit final
+            get('btn-next-2').addEventListener('click', () => {
+                if (validate_pane_2()) submit_cadastro();
+            });
+
+            // Validação inline ao sair do campo (blur)
+            const blur_validators = {
+                cpf:          () => validate_cpf(get('cpf').value) ? (mark_valid(get('cpf')), hide_error('err-cpf')) : (mark_invalid(get('cpf')), show_error('err-cpf', 'CPF inválido.')),
+                celular:      () => validate_celular(get('celular').value) ? (mark_valid(get('celular')), hide_error('err-celular')) : (mark_invalid(get('celular')), show_error('err-celular', 'Número inválido.')),
+                email:        () => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(get('email').value.trim()) ? (mark_valid(get('email')), hide_error('err-email')) : (mark_invalid(get('email')), show_error('err-email', 'E-mail inválido.')),
+                placa:        () => validate_placa(get('placa').value) ? (mark_valid(get('placa')), hide_error('err-placa')) : (mark_invalid(get('placa')), show_error('err-placa', 'Placa inválida.')),
+                ano:          () => /^(19|20)\d{2}(\/\d{2,4})?$/.test(get('ano').value.trim()) ? (mark_valid(get('ano')), hide_error('err-ano')) : (mark_invalid(get('ano')), show_error('err-ano', 'Ano inválido.')),
+            };
+
+            Object.entries(blur_validators).forEach(([id, fn]) => {
+                get(id)?.addEventListener('blur', fn);
+            });
+        });
+    </script>
+</body>
+</html>
