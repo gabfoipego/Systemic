@@ -1,0 +1,94 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 620" width="800" height="620" font-family="monospace, sans-serif">
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M2 1L8 5L2 9" fill="none" stroke="#888" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+    <marker id="arr-gold" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M2 1L8 5L2 9" fill="none" stroke="#b07d2a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+    <marker id="arr-dash" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M2 1L8 5L2 9" fill="none" stroke="#999" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+  </defs>
+
+  <!-- Background -->
+  <rect width="800" height="620" fill="#0d0e10"/>
+
+  <!-- Title -->
+  <text x="400" y="38" text-anchor="middle" font-size="18" font-weight="bold" fill="#f0f1f3" font-family="monospace">Systemic — Arquitetura de Deployment</text>
+  <text x="400" y="56" text-anchor="middle" font-size="11" fill="#888">Docker Compose · PHP 8.2 · MariaDB 10.11 · Apache · GitHub Actions</text>
+
+  <!-- ── Docker Compose envelope ── -->
+  <rect x="50" y="74" width="700" height="390" rx="16" fill="#14161a" stroke="#1e5c4a" stroke-width="1.2"/>
+  <text x="74" y="100" font-size="13" font-weight="bold" fill="#3dbf8f" font-family="monospace">Host Machine — Docker Compose</text>
+  <text x="74" y="116" font-size="10" fill="#5a9c80" font-family="monospace">docker-compose.yml · 8080:80</text>
+
+  <!-- ── Serviço web ── -->
+  <rect x="80" y="130" width="280" height="150" rx="10" fill="#1a1040" stroke="#6c52cc" stroke-width="1"/>
+  <text x="220" y="155" text-anchor="middle" font-size="13" font-weight="bold" fill="#a990f0" font-family="monospace">serviço: web</text>
+  <text x="220" y="173" text-anchor="middle" font-size="10" fill="#8870cc" font-family="monospace">php:8.2-apache</text>
+  <text x="220" y="191" text-anchor="middle" font-size="10" fill="#8870cc" font-family="monospace">mod_rewrite · pdo_mysql · mysqli</text>
+  <text x="220" y="209" text-anchor="middle" font-size="10" fill="#8870cc" font-family="monospace">DocumentRoot: /var/www/html</text>
+  <text x="220" y="227" text-anchor="middle" font-size="10" fill="#8870cc" font-family="monospace">mount: ./frontend → /var/www/html</text>
+  <text x="220" y="245" text-anchor="middle" font-size="10" fill="#8870cc" font-family="monospace">depends_on: db (healthy)</text>
+  <text x="220" y="263" text-anchor="middle" font-size="10" fill="#8870cc" font-family="monospace">EXPOSE 80</text>
+
+  <!-- ── Serviço db ── -->
+  <rect x="440" y="130" width="280" height="150" rx="10" fill="#1a0e0e" stroke="#cc5252" stroke-width="1"/>
+  <text x="580" y="155" text-anchor="middle" font-size="13" font-weight="bold" fill="#f09090" font-family="monospace">serviço: db</text>
+  <text x="580" y="173" text-anchor="middle" font-size="10" fill="#cc7070" font-family="monospace">mariadb:10.11</text>
+  <text x="580" y="191" text-anchor="middle" font-size="10" fill="#cc7070" font-family="monospace">porta 3306</text>
+  <text x="580" y="209" text-anchor="middle" font-size="10" fill="#cc7070" font-family="monospace">volume: db_data (persistente)</text>
+  <text x="580" y="227" text-anchor="middle" font-size="10" fill="#cc7070" font-family="monospace">01_schema.sql → initdb.d</text>
+  <text x="580" y="245" text-anchor="middle" font-size="10" fill="#cc7070" font-family="monospace">02_seed.sql → initdb.d</text>
+  <text x="580" y="263" text-anchor="middle" font-size="10" fill="#cc7070" font-family="monospace">healthcheck: 5s interval · 10 retries</text>
+
+  <!-- Seta web → db -->
+  <line x1="360" y1="204" x2="438" y2="204" stroke="#b07d2a" stroke-width="1" stroke-dasharray="none" marker-end="url(#arr-gold)"/>
+  <text x="399" y="196" text-anchor="middle" font-size="9" fill="#b07d2a" font-family="monospace">PDO / MySQL</text>
+  <text x="399" y="218" text-anchor="middle" font-size="9" fill="#b07d2a" font-family="monospace">healthcheck</text>
+
+  <!-- ── Volumes row ── -->
+  <rect x="80" y="302" width="640" height="48" rx="8" fill="#111418" stroke="#2a3a30" stroke-width="0.8"/>
+  <text x="140" y="320" font-size="11" font-weight="bold" fill="#5a9c6a" font-family="monospace">Volumes</text>
+  <text x="140" y="338" font-size="10" fill="#4a7a5a" font-family="monospace">./frontend (bind mount, código-fonte)   ·   db_data (named volume, dados MySQL persistidos)</text>
+
+  <!-- ── ENV row ── -->
+  <rect x="80" y="366" width="640" height="82" rx="8" fill="#111418" stroke="#2a2a3a" stroke-width="0.8"/>
+  <text x="104" y="385" font-size="11" font-weight="bold" fill="#8888cc" font-family="monospace">Variáveis de ambiente</text>
+  <text x="104" y="402" font-size="10" fill="#666699" font-family="monospace">DB_HOST=db · DB_NAME=oficina_db · DB_USER=automax · DB_PASS=automax123</text>
+  <text x="104" y="418" font-size="10" fill="#666699" font-family="monospace">MYSQL_ROOT_PASSWORD=root123 · MYSQL_DATABASE=oficina_db · MYSQL_USER=automax</text>
+  <text x="104" y="434" font-size="10" fill="#666699" font-family="monospace">Lidas via $_ENV / getenv() em Database.php · fallback hardcoded se ausentes</text>
+
+  <!-- ── Browser ── -->
+  <rect x="50" y="490" width="160" height="52" rx="8" fill="#111418" stroke="#555" stroke-width="0.8"/>
+  <text x="130" y="512" text-anchor="middle" font-size="12" font-weight="bold" fill="#d0d0d0" font-family="monospace">Browser</text>
+  <text x="130" y="530" text-anchor="middle" font-size="10" fill="#888" font-family="monospace">HTTP :8080</text>
+
+  <!-- Seta browser → web -->
+  <line x1="210" y1="516" x2="270" y2="516" stroke="#888" stroke-width="0.8" marker-end="url(#arr)"/>
+  <text x="240" y="508" text-anchor="middle" font-size="9" fill="#666" font-family="monospace">:8080→:80</text>
+
+  <!-- ── GitHub Actions ── -->
+  <rect x="440" y="482" width="310" height="70" rx="8" fill="#1a1600" stroke="#b07d2a" stroke-width="0.8"/>
+  <text x="595" y="503" text-anchor="middle" font-size="12" font-weight="bold" fill="#e0c060" font-family="monospace">GitHub Actions (CI/CD)</text>
+  <text x="595" y="520" text-anchor="middle" font-size="10" fill="#aa9040" font-family="monospace">ci.yml: php -l em todo PR → main</text>
+  <text x="595" y="537" text-anchor="middle" font-size="10" fill="#aa9040" font-family="monospace">build-check.yml: docker compose build</text>
+
+  <!-- Seta CI → deploy (dashed) -->
+  <path d="M595 482 L595 454 L220 454 L220 282" fill="none" stroke="#b07d2a" stroke-width="0.8" stroke-dasharray="6 4" marker-end="url(#arr-gold)"/>
+  <text x="400" y="447" text-anchor="middle" font-size="9" fill="#b07d2a" font-family="monospace">build &amp; validate</text>
+
+  <!-- Legenda -->
+  <rect x="50" y="572" width="700" height="36" rx="6" fill="#0d0e10"/>
+  <rect x="60" y="582" width="10" height="10" rx="2" fill="#6c52cc"/>
+  <text x="76" y="591" font-size="10" fill="#888" font-family="monospace">Aplicação PHP</text>
+  <rect x="180" y="582" width="10" height="10" rx="2" fill="#cc5252"/>
+  <text x="196" y="591" font-size="10" fill="#888" font-family="monospace">Banco de dados</text>
+  <rect x="310" y="582" width="10" height="10" rx="2" fill="#1e5c4a"/>
+  <text x="326" y="591" font-size="10" fill="#888" font-family="monospace">Infraestrutura Docker</text>
+  <rect x="460" y="582" width="10" height="10" rx="2" fill="#b07d2a"/>
+  <text x="476" y="591" font-size="10" fill="#888" font-family="monospace">CI/CD</text>
+  <rect x="530" y="582" width="10" height="10" rx="2" fill="#555"/>
+  <text x="546" y="591" font-size="10" fill="#888" font-family="monospace">Cliente / Neutro</text>
+</svg>
