@@ -1,0 +1,41 @@
+# Dependências
+/vendor/
+
+# Cache do Composer
+composer.phar
+
+# PHPUnit
+.phpunit.result.cache
+.phpunit.cache/
+
+# Variáveis de ambiente
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+/logs/
+
+# Uploads e arquivos gerados
+/uploads/
+/storage/
+
+# IDEs
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Docker
+.docker/
+
+# Build artifacts
+/dist/
+/build/
