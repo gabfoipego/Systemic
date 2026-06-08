@@ -1,0 +1,79 @@
+<?php
+
+declare(strict_types=1);
+
+class DatabaseException extends \RuntimeException {}
+
+class Database
+{
+    private static ?Database $instance = null;
+    private readonly PDO $connection;
+
+    private function __construct()
+    {
+        $host = $_ENV['FG_DB_HOST'] ?? getenv('FG_DB_HOST') ?: 'db';
+        $name = $_ENV['FG_DB_NAME'] ?? getenv('FG_DB_NAME') ?: 'flowgate_db';
+        $user = $_ENV['FG_DB_USER'] ?? getenv('FG_DB_USER') ?: 'flowgate';
+        $pass = $_ENV['FG_DB_PASS'] ?? getenv('FG_DB_PASS')
+            ?: throw new \RuntimeException('Variável de ambiente FG_DB_PASS não configurada.');
+
+        $dsn = "mysql:host={$host};dbname={$name};charset=utf8mb4";
+
+        $options = [
+            PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
+            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+            PDO::ATTR_EMULATE_PREPARES   => false,
+        ];
+
+        try {
+            $this->connection = new PDO($dsn, $user, $pass, $options);
+        } catch (\PDOException $e) {
+            throw new DatabaseException('Não foi possível conectar ao banco de dados.', 0, $e);
+        }
+    }
+
+    public static function get_instance(): self
+    {
+        if (self::$instance === null) {
+            self::$instance = new self();
+        }
+        return self::$instance;
+    }
+
+    public function query(string $sql, array $params = []): array
+    {
+        $stmt = $this->connection->prepare($sql);
+        $stmt->execute($params);
+        return $stmt->fetchAll();
+    }
+
+    public function query_one(string $sql, array $params = []): ?array
+    {
+        $stmt = $this->connection->prepare($sql);
+        $stmt->execute($params);
+        $row = $stmt->fetch();
+        return $row !== false ? $row : null;
+    }
+
+    public function execute(string $sql, array $params = []): int
+    {
+        $stmt = $this->connection->prepare($sql);
+        $stmt->execute($params);
+        return $stmt->rowCount();
+    }
+
+    public function last_insert_id(): string
+    {
+        return $this->connection->lastInsertId();
+    }
+
+    public function begin_transaction(): void { $this->connection->beginTransaction(); }
+    public function commit(): void            { $this->connection->commit(); }
+
+    public function rollback(): void
+    {
+        if ($this->connection->inTransaction()) {
+            $this->connection->rollBack();
+        }
+    }
+}
