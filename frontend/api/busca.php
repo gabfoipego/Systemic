@@ -4,13 +4,8 @@ declare(strict_types=1);
 use Automax\Config\Database;
 use Automax\Config\DatabaseException;
 
-
+use Automax\Controllers\AuthController;
 use Automax\Controllers\ProdutoNotFoundException;
-use Automax\Config\DatabaseException;
-
-
-use Automax\Config\Database;
-use Automax\Config\DatabaseException;
 
 /*
  * Endpoint: GET /api/produtos?pagina=:n&categoria=:cat
