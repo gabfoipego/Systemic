@@ -874,9 +874,12 @@ function apply_ui_permissions() {
     if (el) el.style.display = visible ? '' : 'none';
   };
 
-  show('btnNova',    can.criar);
-  show('navClientes', can.ver_clientes);
-  show('navEstoque',  can.ver_estoque);
+  show('btnNova',         can.criar);
+  show('navClientes',     can.ver_clientes);
+  show('navEstoque',      can.ver_estoque);
+  show('navFornecedores', can.ver_estoque);
+  show('navFuncionarios', window.__session_user?.nivel === 'gerente');
+  show('navLogs',         window.__session_user?.nivel === 'gerente');
 }
 
 function init_user_display() {

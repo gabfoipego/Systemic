@@ -38,7 +38,6 @@
     </div>
   </div>
 
-  <!-- Navegação -->
   <nav class="sb-nav" aria-label="Seções do sistema">
     <div class="nav-sec">Principal</div>
     <a href="#" class="nav-item" onclick="return false" aria-label="Dashboard">
@@ -46,18 +45,18 @@
     </a>
 
     <div class="nav-sec">Operações</div>
-    <a href="#" class="nav-item active" onclick="return false" aria-current="page" aria-label="Ordens de Serviço">
+    <a href="/ordem-servico" class="nav-item active" aria-current="page" aria-label="Ordens de Serviço">
       <i class="bi bi-clipboard2-check" aria-hidden="true"></i>
       Ordens de Serviço
       <span class="nav-bdg" id="navBdg">5</span>
     </a>
-    <!--<a href="#" class="nav-item rnav r-g r-r" onclick="return false" aria-label="Clientes">
-      <i class="bi bi-people" aria-hidden="true"></i>Clientes
-    </a>
-    <a href="#" class="nav-item rnav r-g r-m" onclick="return false" aria-label="Estoque">
+    <a href="/estoque" class="nav-item rnav r-m" aria-label="Estoque">
       <i class="bi bi-boxes" aria-hidden="true"></i>Estoque
     </a>
-    <a href="#" class="nav-item rnav r-g" onclick="return false" aria-label="Funcionários">
+    <a href="/fornecedores" class="nav-item rnav r-g" aria-label="Fornecedores">
+      <i class="bi bi-truck" aria-hidden="true"></i>Fornecedores
+    </a>
+    <a href="/funcionarios" class="nav-item rnav r-g" aria-label="Funcionários">
       <i class="bi bi-person-badge" aria-hidden="true"></i>Funcionários
     </a>
 
@@ -66,7 +65,6 @@
       <i class="bi bi-journal-code" aria-hidden="true"></i>Logs
     </a>
   </nav>
--->
   <!-- Footer -->
   <div class="sb-footer">
     <form method="POST" action="/auth/logout" id="formLogout">
