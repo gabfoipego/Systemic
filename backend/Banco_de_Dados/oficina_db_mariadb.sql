@@ -271,6 +271,8 @@ CREATE TABLE IF NOT EXISTS ordem_pecas (
 
 CREATE TABLE IF NOT EXISTS agendamentos (
     id             INT          NOT NULL AUTO_INCREMENT,
+    id_cliente     INT,
+    id_veiculo     INT,
     nome           VARCHAR(255) NOT NULL,
     telefone       VARCHAR(30)  NOT NULL,
     email          VARCHAR(255),
@@ -287,7 +289,17 @@ CREATE TABLE IF NOT EXISTS agendamentos (
     turno          VARCHAR(10),
     status         VARCHAR(20)  NOT NULL DEFAULT 'pendente',
     criado_em      DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (id)
+    PRIMARY KEY (id),
+    CONSTRAINT fk_agendamentos_cliente
+        FOREIGN KEY (id_cliente)
+        REFERENCES clientes (id_cliente)
+        ON DELETE SET NULL
+        ON UPDATE CASCADE,
+    CONSTRAINT fk_agendamentos_veiculo
+        FOREIGN KEY (id_veiculo)
+        REFERENCES veiculos (id_veiculo)
+        ON DELETE SET NULL
+        ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Reativa verificações de chave estrangeira
