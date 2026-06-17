@@ -56,6 +56,11 @@ class AuthControllerTest extends TestCase
         return ['id_funcionario' => $id, 'nome_funcionario' => $nome, 'nivel_de_acesso' => $nivel, 'senha' => $this->senhaHash($senha)];
     }
 
+    private function clienteFake(string $senha, int $id = 1, string $nome = 'Cliente Teste', string $email = 'cliente@automax.com'): array
+    {
+        return ['id_cliente' => $id, 'nome_cliente' => $nome, 'email' => $email, 'senha' => $this->senhaHash($senha)];
+    }
+
     public function test_login_com_campos_vazios_registra_flash_error(): void
     {
         $_POST = ['email' => '', 'senha' => ''];
@@ -122,6 +127,57 @@ class AuthControllerTest extends TestCase
         $this->assertEquals('query_one', $chamada['method']);
         $this->assertStringContainsString('funcionarios', $chamada['sql']);
         $this->assertEquals('maria@automax.com', $chamada['params'][':email']);
+    }
+
+    public function test_login_de_cliente_quando_email_nao_e_funcionario(): void
+    {
+        // Primeira consulta (funcionarios) não encontra ninguém, segunda (clientes) encontra.
+        $this->db->willReturnOnQueryOne(null);
+        $this->db->willReturnOnQueryOne($this->clienteFake('senha123', id: 9, nome: 'Joana Cliente'));
+
+        $_POST = ['email' => 'joana@gmail.com', 'senha' => 'senha123'];
+        $this->runLogin();
+
+        $this->assertEquals(9,              $_SESSION['cliente_id']   ?? null);
+        $this->assertEquals('Joana Cliente', $_SESSION['cliente_nome'] ?? null);
+        $this->assertEquals('cliente',       $_SESSION['tipo_usuario'] ?? null);
+        $this->assertArrayNotHasKey('funcionario_id', $_SESSION);
+    }
+
+    public function test_login_de_funcionario_marca_tipo_usuario(): void
+    {
+        $this->db->willReturnOnQueryOne($this->funcionarioFake('senha123', nivel: 'gerente'));
+        $_POST = ['email' => 'gerente@automax.com', 'senha' => 'senha123'];
+        $this->runLogin();
+
+        $this->assertEquals('funcionario', $_SESSION['tipo_usuario'] ?? null);
+        $this->assertArrayNotHasKey('cliente_id', $_SESSION);
+    }
+
+    public function test_login_com_email_nao_cadastrado_em_nenhuma_tabela(): void
+    {
+        $this->db->willReturnOnQueryOne(null); // funcionarios
+        $this->db->willReturnOnQueryOne(null); // clientes
+
+        $_POST = ['email' => 'ninguem@automax.com', 'senha' => 'qualquer123'];
+        $this->runLogin();
+
+        $this->assertArrayHasKey('flash_error', $_SESSION);
+        $this->assertStringContainsStringIgnoringCase('incorretos', $_SESSION['flash_error']);
+        $this->assertArrayNotHasKey('funcionario_id', $_SESSION);
+        $this->assertArrayNotHasKey('cliente_id', $_SESSION);
+    }
+
+    public function test_login_de_cliente_com_senha_errada_nao_cria_sessao(): void
+    {
+        $this->db->willReturnOnQueryOne(null);
+        $this->db->willReturnOnQueryOne($this->clienteFake('senhaCorreta'));
+
+        $_POST = ['email' => 'cliente@automax.com', 'senha' => 'senhaErrada'];
+        $this->runLogin();
+
+        $this->assertArrayHasKey('flash_error', $_SESSION);
+        $this->assertArrayNotHasKey('cliente_id', $_SESSION);
     }
 
     public function test_logout_limpa_sessao_completamente(): void
