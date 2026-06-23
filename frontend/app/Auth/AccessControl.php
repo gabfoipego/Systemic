@@ -71,10 +71,6 @@ class AccessControl
         }
     }
 
-    /**
-     * Garante que o usuário autenticado é um cliente (não um funcionário).
-     * Usado pelas rotas do painel do cliente (veículos, agendamentos).
-     */
     public static function exigir_cliente(): void
     {
         AuthController::exigir_autenticacao();

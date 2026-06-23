@@ -31,13 +31,9 @@
   </div>
 
     <nav class="sb-nav" aria-label="Seções do sistema">
-        <div class="nav-sec">Principal</div>
-        <a href="#" class="nav-item" onclick="return false" aria-label="Dashboard">
-        <i class="bi bi-speedometer2" aria-hidden="true"></i>Dashboard
-        </a>
 
         <div class="nav-sec">Operações</div>
-        <a href="/ordem-servico" class="nav-item active" aria-current="page" aria-label="Ordens de Serviço">
+        <a href="/ordem-servico" class="nav-item" aria-label="Ordens de Serviço">
         <i class="bi bi-clipboard2-check" aria-hidden="true"></i>
         Ordens de Serviço
         <span class="nav-bdg" id="navBdg">5</span>
@@ -45,7 +41,7 @@
         <a href="/estoque" class="nav-item rnav r-m" aria-label="Estoque">
         <i class="bi bi-boxes" aria-hidden="true"></i>Estoque
         </a>
-        <a href="/fornecedores" class="nav-item rnav r-g" aria-label="Fornecedores">
+        <a href="/fornecedores" class="nav-item active rnav r-g" aria-current="page" aria-label="Fornecedores">
         <i class="bi bi-truck" aria-hidden="true"></i>Fornecedores
         </a>
         <a href="/funcionarios" class="nav-item rnav r-g" aria-label="Funcionários">
@@ -53,7 +49,7 @@
         </a>
 
         <div class="nav-sec">Sistema</div>
-        <a href="#" class="nav-item rnav r-g" onclick="return false" aria-label="Logs do sistema">
+        <a href="/logs" class="nav-item rnav r-g" aria-label="Logs do sistema">
         <i class="bi bi-journal-code" aria-hidden="true"></i>Logs
         </a>
     </nav>
@@ -67,16 +63,6 @@
         </form>
     </div>
     </aside>
-
-  <div class="sb-footer">
-    <form method="POST" action="/auth/logout" id="formLogout">
-      <input type="hidden" name="csrf_token" id="csrfLogout" value="">
-      <button type="submit" class="btn btn-outline" style="width:100%;justify-content:center" aria-label="Sair do sistema">
-        <i class="bi bi-box-arrow-left" aria-hidden="true"></i>Sair
-      </button>
-    </form>
-  </div>
-</aside>
 
 <header class="topbar" role="banner">
   <button class="icon-btn sb-toggle" onclick="toggleSidebar()" aria-label="Abrir menu" aria-expanded="false" aria-controls="sidebar">

@@ -297,6 +297,38 @@ $router->delete('/api/funcionarios/:id', function (array $params) {
     FuncionariosController::deletar($params);
 });
 
+// API de funcionários
+
+$router->get('/api/funcionarios', function () {
+    FuncionariosController::listar();
+});
+
+$router->get('/api/funcionarios/:id', function (array $params) {
+    FuncionariosController::buscar($params);
+});
+
+$router->post('/api/funcionarios', function () {
+    FuncionariosController::criar();
+});
+
+$router->patch('/api/funcionarios/:id', function (array $params) {
+    FuncionariosController::atualizar($params);
+});
+
+$router->delete('/api/funcionarios/:id', function (array $params) {
+    FuncionariosController::deletar($params);
+});
+
+// API de logs
+
+$router->get('/api/logs', function () {
+    LogsController::listar();
+});
+
+$router->get('/api/logs/funcionarios', function () {
+    LogsController::funcionarios_ativos();
+});
+
 // Rotas de cadastro
 
 $router->get('/cadastro', function () {
