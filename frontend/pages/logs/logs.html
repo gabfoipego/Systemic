@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>AutoMax — Logs de Serviços</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet" />
+  <link href="/styles/automax-os.css" rel="stylesheet" />
+</head>
+<body>
+<div class="overlay" id="overlay" onclick="closeSidebar()" aria-hidden="true"></div>
+<div class="toast-c" id="toastC" role="status" aria-live="polite"></div>
+
+<aside class="sidebar" id="sidebar" role="navigation" aria-label="Menu principal">
+  <div class="sb-logo">
+    <div class="sb-logo-icon" aria-hidden="true"><i class="bi bi-wrench-adjustable"></i></div>
+    <div>
+      <div class="sb-logo-name">AutoMax</div>
+      <div class="sb-logo-tag">Soluções Automotivas</div>
+    </div>
+  </div>
+
+  <div class="sb-profile" aria-label="Usuário logado">
+    <div class="av" id="sbAv" aria-hidden="true"></div>
+    <div>
+      <div class="prof-name" id="sbName"></div>
+      <span class="pbadge" id="sbRole"></span>
+    </div>
+  </div>
+
+  <nav class="sb-nav" aria-label="Seções do sistema">
+    <div class="nav-sec">Operações</div>
+    <a href="/ordem-servico" class="nav-item" aria-label="Ordens de Serviço">
+      <i class="bi bi-clipboard2-check" aria-hidden="true"></i>
+      Ordens de Serviço
+    </a>
+    <a href="/estoque" class="nav-item rnav r-m" aria-label="Estoque">
+      <i class="bi bi-boxes" aria-hidden="true"></i>Estoque
+    </a>
+    <a href="/fornecedores" class="nav-item rnav r-g" aria-label="Fornecedores">
+      <i class="bi bi-truck" aria-hidden="true"></i>Fornecedores
+    </a>
+    <a href="/funcionarios" class="nav-item rnav r-g" aria-label="Funcionários">
+      <i class="bi bi-person-badge" aria-hidden="true"></i>Funcionários
+    </a>
+
+    <div class="nav-sec">Sistema</div>
+    <a href="/logs" class="nav-item active rnav r-g" aria-current="page" aria-label="Logs de serviços">
+      <i class="bi bi-journal-code" aria-hidden="true"></i>Logs
+    </a>
+  </nav>
+
+  <div class="sb-footer">
+    <form method="POST" action="/auth/logout" id="formLogout">
+      <input type="hidden" name="csrf_token" id="csrfLogout" value="">
+      <button type="submit" class="btn btn-outline" style="width:100%;justify-content:center" aria-label="Sair do sistema">
+        <i class="bi bi-box-arrow-left" aria-hidden="true"></i>Sair
+      </button>
+    </form>
+  </div>
+</aside>
+
+<header class="topbar" role="banner">
+  <button class="icon-btn sb-toggle" onclick="toggleSidebar()" aria-label="Abrir menu" aria-expanded="false" aria-controls="sidebar">
+    <i class="bi bi-list" aria-hidden="true"></i>
+  </button>
+
+  <nav class="tb-crumb" aria-label="Navegação estrutural">
+    <span class="tb-root">AutoMax</span>
+    <i class="bi bi-chevron-right" style="color:var(--steel);font-size:11px" aria-hidden="true"></i>
+    <span class="tb-cur">Logs de Serviços</span>
+  </nav>
+
+  <div style="margin-left:auto;display:flex;align-items:center;gap:8px">
+    <button class="icon-btn" aria-label="Notificações">
+      <i class="bi bi-bell" aria-hidden="true"></i>
+    </button>
+  </div>
+</header>
+
+<main class="main" id="mainContent">
+<div class="pc">
+
+  <div class="ph">
+    <div class="pt">
+      <small>Módulo de Sistema</small>
+      Logs de <span class="pt-acc">Serviços</span>
+    </div>
+  </div>
+
+  <section class="stats" role="region" aria-label="Resumo dos serviços concluídos">
+    <div class="sc">
+      <div class="sc-ico" style="background:var(--blue-soft)" aria-hidden="true">
+        <i class="bi bi-journal-check" style="color:var(--blue)"></i>
+      </div>
+      <div>
+        <div class="sc-val" style="color:var(--blue)" id="statTotal">0</div>
+        <div class="sc-lbl">Serviços concluídos</div>
+      </div>
+    </div>
+
+    <div class="sc">
+      <div class="sc-ico" style="background:var(--green-soft)" aria-hidden="true">
+        <i class="bi bi-cash-coin" style="color:var(--green)"></i>
+      </div>
+      <div>
+        <div class="sc-val" style="color:var(--green)" id="statReceita">—</div>
+        <div class="sc-lbl">Receita no filtro</div>
+      </div>
+    </div>
+
+    <div class="sc">
+      <div class="sc-ico" style="background:var(--purple-soft)" aria-hidden="true">
+        <i class="bi bi-tools" style="color:var(--purple)"></i>
+      </div>
+      <div>
+        <div class="sc-val" style="color:var(--purple)" id="statMdo">—</div>
+        <div class="sc-lbl">Mão de obra no filtro</div>
+      </div>
+    </div>
+  </section>
+
+  <div class="toolbar" role="search" aria-label="Filtros de logs">
+    <div class="search-wrap">
+      <i class="bi bi-search" aria-hidden="true"></i>
+      <input type="search" id="inputBusca" class="inp inp-search" placeholder="Funcionário, cliente ou tipo…" autocomplete="off" aria-label="Buscar" />
+    </div>
+
+    <select id="selectFuncionario" class="inp" style="min-width:180px" aria-label="Filtrar por funcionário">
+      <option value="">Todos os funcionários</option>
+    </select>
+
+    <input type="date" id="inputDataInicio" class="inp" style="min-width:140px" aria-label="Data inicial" />
+    <input type="date" id="inputDataFim" class="inp" style="min-width:140px" aria-label="Data final" />
+
+    <button class="btn btn-ghost" onclick="limparFiltros()" aria-label="Limpar filtros">
+      <i class="bi bi-x-circle" aria-hidden="true"></i>Limpar
+    </button>
+  </div>
+
+  <section aria-label="Lista de serviços concluídos">
+    <div class="card">
+
+      <div class="card-head">
+        <i class="bi bi-journal-code" style="color:var(--red-vivid);font-size:16px" aria-hidden="true"></i>
+        <span class="card-title">Histórico de Serviços</span>
+      </div>
+
+      <div class="table-wrap">
+        <table class="tbl" aria-label="Tabela de logs de serviços concluídos">
+          <thead>
+            <tr>
+              <th scope="col">#OS</th>
+              <th scope="col">Funcionário</th>
+              <th scope="col">Nível</th>
+              <th scope="col">Cliente</th>
+              <th scope="col">Tipo</th>
+              <th scope="col">Abertura</th>
+              <th scope="col">Fechamento</th>
+              <th scope="col">Orçamento</th>
+              <th scope="col">Mão de obra</th>
+            </tr>
+          </thead>
+          <tbody id="tabelaBody">
+            <tr>
+              <td colspan="9">
+                <div class="empty">
+                  <i class="bi bi-hourglass-split" aria-hidden="true"></i>
+                  <h4>Carregando...</h4>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="pag-bar" id="pagBar" style="display:none">
+        <span class="pag-info" id="pagInfo" aria-live="polite">—</span>
+        <div class="pag-btns" id="pagBtns" role="navigation" aria-label="Paginação"></div>
+      </div>
+
+    </div>
+  </section>
+
+</div>
+</main>
+
+<script src="/pages/logs/logs.js"></script>
+</body>
+</html>
