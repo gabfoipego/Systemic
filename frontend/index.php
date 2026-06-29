@@ -178,6 +178,10 @@ $router->post('/cadastro/criar', function () {
     CadastroController::handle_criar();
 });
 
+$router->get('/logs', function () {
+    serve_page('/pages/logs/', __DIR__ . '/pages/logs/logs.html');
+});
+
 // Rotas protegidas
 
 $router->get('/produtos', function () {
