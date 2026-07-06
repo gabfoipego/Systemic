@@ -282,10 +282,10 @@
                 </div>
                 <div class="col-12">
                   <div class="form-group">
-                    <label class="form-label" for="email">E-mail</label>
+                    <label class="form-label" for="email">E-mail da conta</label>
                     <input type="email" id="email" name="email" class="form-control"
-                           placeholder="voce@email.com" autocomplete="email">
-                    <p class="form-hint">Opcional — para envio do resumo da solicitação.</p>
+                           autocomplete="email" readonly>
+                    <p class="form-hint">Usamos o e-mail da sua conta para você acompanhar este agendamento em "Minha conta".</p>
                   </div>
                 </div>
               </div>
@@ -557,11 +557,13 @@
       input.min = `${yyyy}-${mm}-${dd}`;
     })();
 
-    (function preencher_nome_usuario() {
+    (function preencher_dados_usuario() {
       const user = window.__session_user;
-      if (!user || !user.nome) return;
-      const input = document.getElementById('nome');
-      if (input && !input.value) input.value = user.nome;
+      if (!user) return;
+      const nome_input = document.getElementById('nome');
+      if (nome_input && !nome_input.value) nome_input.value = user.nome || '';
+      const email_input = document.getElementById('email');
+      if (email_input) email_input.value = user.email || '';
     })();
 
     const icone_veiculo_svg = `
