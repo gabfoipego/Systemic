@@ -28,7 +28,7 @@ function serve_page(string $base_href, string $file_path): void
     header('Content-Type: text/html; charset=UTF-8');
     header('X-Content-Type-Options: nosniff');
     header('X-Frame-Options: SAMEORIGIN');
-    header("Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net; img-src 'self' data: https://placehold.co; connect-src 'self' https://cdn.jsdelivr.net");
+    header("Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net; img-src 'self' data: blob: https://placehold.co; connect-src 'self' https://cdn.jsdelivr.net");
     echo '<base href="' . $base_href . '">';
     include $file_path;
 }
@@ -47,7 +47,7 @@ function serve_page_with_optional_session(string $base_href, string $file_path):
     header('Content-Type: text/html; charset=UTF-8');
     header('X-Content-Type-Options: nosniff');
     header('X-Frame-Options: SAMEORIGIN');
-    header("Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net; img-src 'self' data: https://placehold.co; connect-src 'self' https://cdn.jsdelivr.net");
+    header("Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net; img-src 'self' data: blob: https://placehold.co; connect-src 'self' https://cdn.jsdelivr.net");
 
     echo '<base href="' . $base_href . '">';
 
@@ -110,7 +110,7 @@ function serve_protected_page(string $base_href, string $file_path): void
     header('Content-Type: text/html; charset=UTF-8');
     header('X-Content-Type-Options: nosniff');
     header('X-Frame-Options: SAMEORIGIN');
-    header("Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net; img-src 'self' data: https://placehold.co; connect-src 'self' https://cdn.jsdelivr.net");
+    header("Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net; img-src 'self' data: blob: https://placehold.co; connect-src 'self' https://cdn.jsdelivr.net");
     echo '<base href="' . $base_href . '">';
     echo "<script>window.__session_user = {$safe_json};</script>";
     include $file_path;
@@ -221,7 +221,7 @@ $router->get('/produto/:id', function (array $params) {
     header('Content-Type: text/html; charset=UTF-8');
     header('X-Content-Type-Options: nosniff');
     header('X-Frame-Options: SAMEORIGIN');
-    header("Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net; img-src 'self' data: https://placehold.co; connect-src 'self' https://cdn.jsdelivr.net");
+    header("Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net; img-src 'self' data: blob: https://placehold.co; connect-src 'self' https://cdn.jsdelivr.net");
     echo '<base href="/pages/produto/">';
     echo "<script>window.__produto_id = {$safe_id}; window.__session_user = {$safe_user};</script>";
     include __DIR__ . '/pages/produto/produto.html';
@@ -330,6 +330,10 @@ $router->delete('/api/fornecedores/:id', function (array $params) {
 
 $router->get('/api/estoque', function () {
     EstoqueController::listar();
+});
+
+$router->post('/api/estoque/imagem', function () {
+    EstoqueController::imagem_upload();
 });
 
 $router->get('/api/estoque/:id', function (array $params) {
@@ -449,6 +453,30 @@ $router->post('/api/perfil/foto', function () {
 $router->delete('/api/perfil/foto', function () {
     AccessControl::exigir_cliente();
     ClienteController::foto_remover();
+});
+
+// Servir imagens de produtos salvas em disco
+
+$router->get('/uploads/produtos/:arquivo', function (array $params) {
+    $nome = basename($params['arquivo'] ?? '');
+
+    if (!preg_match('/^prod_[a-f0-9._]+\.webp$/', $nome)) {
+        http_response_code(404);
+        exit;
+    }
+
+    $caminho = '/var/www/html/automax/uploads/produtos/' . $nome;
+
+    if (!file_exists($caminho)) {
+        http_response_code(404);
+        exit;
+    }
+
+    header('Content-Type: image/webp');
+    header('Cache-Control: public, max-age=3600');
+    header('X-Content-Type-Options: nosniff');
+    readfile($caminho);
+    exit;
 });
 
 // Servir avatares salvos em disco legal
