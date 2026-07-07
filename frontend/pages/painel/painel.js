@@ -13,7 +13,6 @@ const STATUS_LABELS = {
 };
 
 document.addEventListener('DOMContentLoaded', function () {
-    inject_csrf_logout();
     init_boas_vindas();
     init_botao_voltar();
     carregar_perfil();
@@ -59,13 +58,6 @@ function abrir_modal(id) {
 
 function fechar_modal(id) {
     document.getElementById(id).hidden = true;
-}
-
-function inject_csrf_logout() {
-    const token = window.__session_user?.csrf_token ?? '';
-    document.querySelectorAll('#csrfLogout, .csrf-logout-input').forEach(function (input) {
-        input.value = token;
-    });
 }
 
 function init_boas_vindas() {
@@ -132,6 +124,8 @@ function renderizar_perfil(perfil) {
     document.getElementById('perfilNome').textContent  = perfil.nome  || '';
     document.getElementById('perfilEmail').textContent = perfil.email || '';
     document.getElementById('btnRemoverFoto').hidden = !perfil.foto_url;
+
+    window.atualizar_avatar_navbar?.(perfil.foto_url);
 }
 
 function mostrar_erro_perfil(mensagem) {
@@ -174,6 +168,7 @@ async function enviar_foto_perfil(evento) {
 
         document.getElementById('avatarPerfil').src = json.foto_url;
         document.getElementById('btnRemoverFoto').hidden = false;
+        window.atualizar_avatar_navbar?.(json.foto_url);
     } catch (erro) {
         mostrar_erro_perfil('Falha na conexão. Tente novamente.');
     } finally {
@@ -199,6 +194,7 @@ async function remover_foto_perfil() {
         const nome = document.getElementById('perfilNome').textContent;
         document.getElementById('avatarPerfil').src = url_avatar_placeholder(nome);
         btn.hidden = true;
+        window.atualizar_avatar_navbar?.(null);
     } catch (erro) {
         mostrar_erro_perfil('Não foi possível remover a foto. Tente novamente.');
     } finally {

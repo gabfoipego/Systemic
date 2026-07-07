@@ -25,6 +25,7 @@
     function montar_dropdown(container_actions, perfil, csrf_token) {
         const nome = perfil.nome || '';
         const foto = perfil.foto_url || url_placeholder(nome);
+        const na_pagina_painel = window.location.pathname.startsWith('/painel');
 
         container_actions.innerHTML = '';
 
@@ -38,7 +39,7 @@
                 <svg class="nav-avatar-caret" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
             </button>
             <div class="nav-user-dropdown" role="menu">
-                <a href="/painel" role="menuitem">Meu painel</a>
+                ${na_pagina_painel ? '' : '<a href="/painel" role="menuitem">Meu painel</a>'}
                 <a href="/pedir" role="menuitem">Agendar serviço</a>
                 <div class="dropdown-divider" role="separator"></div>
                 <button id="navBtnLogout" class="dropdown-item-danger" role="menuitem">Sair</button>
@@ -87,6 +88,17 @@
         const container = document.querySelector('.navbar-actions');
         if (!container) return;
 
+        const sessao_pronta = window.__session_user;
+        if (sessao_pronta === null) return;
+
+        /* Funcionários não têm endpoint de perfil com foto — a sessão
+           injetada pelo backend já é tudo que existe, então montamos
+           direto, sem round-trip à API. */
+        if (sessao_pronta && sessao_pronta.nome && sessao_pronta.tipo === 'funcionario') {
+            montar_dropdown(container, sessao_pronta, sessao_pronta.csrf_token || '');
+            return;
+        }
+
         try {
             const res = await fetch('/api/perfil', { credentials: 'same-origin' });
             if (!res.ok) return;
@@ -104,4 +116,14 @@
     } else {
         init();
     }
+
+    /* Chamada por outras páginas (ex.: painel) após o cliente trocar
+       ou remover a foto de perfil, para refletir a mudança na navbar
+       sem precisar recarregar a página. */
+    window.atualizar_avatar_navbar = function (foto_url) {
+        const img = document.querySelector('.nav-avatar-img');
+        if (!img) return;
+        const nome = img.alt.replace(/^Foto de perfil de /, '');
+        img.src = foto_url || url_placeholder(nome);
+    };
 }());

@@ -30,11 +30,8 @@
         </ul>
 
         <div class="navbar-actions d-none d-md-flex">
-          <a href="/painel" class="btn-ghost-nav active" aria-current="page">Minha conta</a>
-          <form method="POST" action="/auth/logout" id="formLogout" class="d-inline">
-            <input type="hidden" name="csrf_token" id="csrfLogout" value="">
-            <button type="submit" class="btn-red-nav" style="border:none;cursor:pointer">Sair</button>
-          </form>
+          <a href="/auth/login" class="btn-ghost-nav">Entrar</a>
+          <a href="/cadastro" class="btn-red-nav">Cadastrar</a>
         </div>
 
         <button class="mobile-toggle d-lg-none" id="mobileToggle"
@@ -53,11 +50,8 @@
           <li><a href="/pedir"    class="mobile-nav-link">Agendar</a></li>
         </ul>
         <div class="mobile-actions">
-          <a href="/painel" class="btn-ghost-nav w-100 text-center">Minha conta</a>
-          <form method="POST" action="/auth/logout" id="formLogoutMobile">
-            <input type="hidden" name="csrf_token" class="csrf-logout-input" value="">
-            <button type="submit" class="btn-red-nav w-100" style="border:none;cursor:pointer">Sair</button>
-          </form>
+          <a href="/auth/login" class="btn-ghost-nav w-100 text-center">Entrar</a>
+          <a href="/cadastro" class="btn-red-nav w-100 text-center">Cadastrar</a>
         </div>
       </div>
     </div>
@@ -246,6 +240,7 @@
       menu.setAttribute('aria-hidden', String(!open));
     });
   </script>
+  <script src="/navbar-session.js" defer></script>
   <script src="/pages/painel/painel.js"></script>
 </body>
 </html>
