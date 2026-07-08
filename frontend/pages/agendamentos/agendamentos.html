@@ -24,6 +24,7 @@
     .status-confirmado { color: var(--blue);  background: var(--blue-soft);  border-color: var(--blue-border); }
     .status-concluido  { color: var(--green); background: var(--green-soft); border-color: var(--green-border); }
     .status-cancelado  { color: var(--rose);  background: rgba(251,113,133,0.10); border-color: rgba(251,113,133,0.30); }
+    .status-em_atendimento { color: var(--purple); background: var(--purple-soft); border-color: var(--purple-border); }
 
     .ag-info-grid {
       display: grid;
@@ -153,6 +154,7 @@
       <button class="chip ativo" data-status="">Todos</button>
       <button class="chip" data-status="pendente">Pendentes</button>
       <button class="chip" data-status="confirmado">Confirmados</button>
+      <button class="chip" data-status="em_atendimento">Em Atendimento</button>
       <button class="chip" data-status="concluido">Concluídos</button>
       <button class="chip" data-status="cancelado">Cancelados</button>
     </div>
@@ -240,6 +242,9 @@
           <i class="bi bi-trash3" aria-hidden="true"></i>Excluir
         </button>
         <button class="btn btn-outline" data-bs-dismiss="modal">Fechar</button>
+        <button class="btn btn-primary" id="btnChamarOsDetalhe" onclick="chamarOrdemServico(document.getElementById('agId').value)">
+          <i class="bi bi-clipboard2-plus" aria-hidden="true"></i>Chamar Ordem de Serviço
+        </button>
         <button class="btn btn-primary" id="btnSalvarStatus" onclick="salvarStatus()">
           <i class="bi bi-floppy" aria-hidden="true"></i>Salvar status
         </button>
@@ -368,6 +373,85 @@
         <button class="btn btn-outline" data-bs-dismiss="modal">Cancelar</button>
         <button class="btn btn-primary" id="btnSalvarNovo" onclick="salvarNovoAgendamento()">
           <i class="bi bi-floppy" aria-hidden="true"></i>Salvar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Selecionar Cliente/Veículo (fallback quando não dá pra automatizar) -->
+<div class="modal fade" id="mSelecaoOS" tabindex="-1" aria-labelledby="mSelecaoOSLbl" aria-modal="true" role="dialog">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 class="modal-title" id="mSelecaoOSLbl">
+          <i class="bi bi-clipboard2-plus" style="color:var(--red-vivid);margin-right:8px" aria-hidden="true"></i>
+          Confirmar Cliente e Veículo
+        </h2>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+      </div>
+      <div class="modal-body">
+        <div class="vmsg" id="vMsgSelecao" role="alert">
+          <i class="bi bi-exclamation-circle-fill" style="font-size:18px;flex-shrink:0" aria-hidden="true"></i>
+          <span id="vTxtSelecao"></span>
+        </div>
+        <p style="font-size:13px;color:var(--text-dim);margin-bottom:16px">
+          Não encontramos automaticamente todos os dados para abrir a OS.
+          Confirme abaixo o cliente e o veículo.
+        </p>
+
+        <input type="hidden" id="selAgendamentoId">
+
+        <div id="blocoSelecaoCliente">
+          <label class="form-label" for="selBuscaCliente">Buscar cliente por nome</label>
+          <input class="form-control" type="text" id="selBuscaCliente" placeholder="Digite o nome do cliente..." autocomplete="off">
+          <div class="table-wrap" style="max-height:220px;overflow-y:auto;margin-top:8px">
+            <table class="tbl" aria-label="Resultados da busca de clientes">
+              <tbody id="selListaClientes"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div id="blocoSelecaoVeiculo" style="display:none;margin-top:20px">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+            <i class="bi bi-person-check-fill" style="color:var(--green)" aria-hidden="true"></i>
+            <strong id="selClienteNomeConfirmado" style="color:var(--off-white)"></strong>
+            <button class="btn btn-outline" style="margin-left:auto;padding:2px 10px;font-size:11px" onclick="trocarClienteSelecaoOS()">Trocar</button>
+          </div>
+
+          <label class="form-label" for="selVeiculoExistente">Veículo já cadastrado deste cliente</label>
+          <select class="form-select" id="selVeiculoExistente">
+            <option value="">— Cadastrar veículo novo —</option>
+          </select>
+
+          <div id="blocoVeiculoNovo" class="row g-3" style="margin-top:12px">
+            <div class="col-md-4">
+              <label class="form-label" for="selVMarca">Marca *</label>
+              <input class="form-control" type="text" id="selVMarca" maxlength="100">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label" for="selVModelo">Modelo *</label>
+              <input class="form-control" type="text" id="selVModelo" maxlength="100">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label" for="selVAno">Ano</label>
+              <input class="form-control" type="text" id="selVAno" maxlength="10">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label" for="selVCor">Cor *</label>
+              <input class="form-control" type="text" id="selVCor" maxlength="50">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label" for="selVPlaca">Placa *</label>
+              <input class="form-control" type="text" id="selVPlaca" maxlength="8" style="text-transform:uppercase">
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" data-bs-dismiss="modal">Cancelar</button>
+        <button class="btn btn-primary" id="btnConfirmarSelecaoOS" onclick="confirmarSelecaoOS()" style="display:none">
+          <i class="bi bi-clipboard2-check" aria-hidden="true"></i>Confirmar e Abrir OS
         </button>
       </div>
     </div>

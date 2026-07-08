@@ -83,7 +83,7 @@ function esc(str) {
 }
 
 function label_status(status) {
-    return { pendente: 'Pendente', confirmado: 'Confirmado', concluido: 'Concluído', cancelado: 'Cancelado' }[status] ?? status;
+    return { pendente: 'Pendente', confirmado: 'Confirmado', em_atendimento: 'Em Atendimento', concluido: 'Concluído', cancelado: 'Cancelado' }[status] ?? status;
 }
 
 function formatar_data(data) {
@@ -129,6 +129,7 @@ function renderTabela(agendamentos) {
     tbody.innerHTML = agendamentos.map(a => {
         const status_cls = `status-badge status-${esc(a.status)}`;
         const veiculo     = `${esc(a.marca)} ${esc(a.modelo)}${a.placa ? ' · ' + esc(a.placa) : ''}`;
+        const pode_chamar_os = pode_gerir && (a.status === 'pendente' || a.status === 'confirmado');
 
         return `
           <tr>
@@ -139,10 +140,14 @@ function renderTabela(agendamentos) {
               ${formatar_data(a.data_preferida)}${a.turno ? ' · ' + esc(a.turno) : ''}
             </td>
             <td><span class="${status_cls}">${label_status(a.status)}</span></td>
-            <td>
+            <td style="display:flex;gap:4px">
               <button class="icon-btn" onclick="abrirDetalhes(${a.id})" title="Ver detalhes" aria-label="Ver detalhes de ${esc(a.nome)}">
                 <i class="bi bi-eye" aria-hidden="true"></i>
               </button>
+              ${pode_chamar_os ? `
+              <button class="icon-btn" onclick="chamarOrdemServico(${a.id})" title="Chamar Ordem de Serviço" aria-label="Chamar ordem de serviço de ${esc(a.nome)}">
+                <i class="bi bi-clipboard2-plus" aria-hidden="true"></i>
+              </button>` : ''}
             </td>
           </tr>`;
     }).join('');
@@ -213,6 +218,9 @@ function abrirDetalhes(id) {
     document.getElementById('inputStatus').disabled = !pode_gerir;
     document.getElementById('btnSalvarStatus').style.display = pode_gerir ? '' : 'none';
     document.getElementById('btnExcluirAg').style.display    = pode_gerir ? '' : 'none';
+
+    const pode_chamar_os = pode_gerir && (a.status === 'pendente' || a.status === 'confirmado');
+    document.getElementById('btnChamarOsDetalhe').style.display = pode_chamar_os ? '' : 'none';
 
     esconderErro();
     modalAg.show();
@@ -318,6 +326,201 @@ function esconderErroNovo() {
     document.getElementById('vMsgNovo').classList.remove('show');
 }
 
+// Chamar Ordem de Serviço a partir de um agendamento
+//
+// Fluxo: tenta primeiro sem nenhum dado extra (o backend tenta casar
+// cliente/veículo sozinho pela placa/e-mail do agendamento). Se o backend
+// não conseguir, abre a modal de seleção manual para o funcionário
+// escolher ou cadastrar o que faltou.
+
+let modalSelecaoOS;
+let suporte_os_cache   = null;
+let selecao_os_cliente = null;
+let timeout_busca_selecao = null;
+
+async function enviarChamadaOS(id, payload) {
+    const res = await fetch(`/api/agendamentos/${id}/chamar-os`, {
+        method:      'POST',
+        credentials: 'same-origin',
+        headers:     { 'Content-Type': 'application/json', 'X-CSRF-Token': csrf },
+        body:        JSON.stringify(payload),
+    });
+    const dados = await res.json();
+    if (!res.ok || dados.ok === false) throw new Error(dados.erro || 'Erro ao chamar ordem de serviço.');
+    return dados;
+}
+
+async function tratarResultadoChamadaOS(id, dados) {
+    if (dados.resolvido) {
+        toast(`Ordem de serviço #${dados.id_ordem} aberta a partir do agendamento.`, 'ok');
+        modalAg.hide();
+        modalSelecaoOS.hide();
+        carregarAgendamentos(pagina_atual);
+        return;
+    }
+
+    const agendamento = agendamentos_cache.find(a => a.id == id) || { id };
+    await abrirModalSelecaoOS(agendamento, dados);
+}
+
+async function chamarOrdemServico(id) {
+    try {
+        const dados = await enviarChamadaOS(id, {});
+        await tratarResultadoChamadaOS(id, dados);
+    } catch (e) {
+        toast(e.message, 'erro');
+    }
+}
+
+async function carregarSuporteOS() {
+    if (suporte_os_cache) return suporte_os_cache;
+
+    const res   = await fetch('/api/ordem/suporte', { credentials: 'same-origin' });
+    const dados = await res.json();
+    if (!res.ok || dados.ok === false) throw new Error(dados.erro || 'Erro ao carregar clientes cadastrados.');
+
+    suporte_os_cache = dados;
+    return dados;
+}
+
+async function abrirModalSelecaoOS(agendamento, resultado) {
+    document.getElementById('selAgendamentoId').value = agendamento.id;
+    esconderErroSelecao();
+    trocarClienteSelecaoOS();
+
+    try {
+        await carregarSuporteOS();
+    } catch (e) {
+        mostrarErroSelecao(e.message);
+    }
+
+    if (resultado.motivo === 'sem_veiculo' && resultado.id_cliente) {
+        const cliente = (suporte_os_cache?.clientes || []).find(c => c.id === resultado.id_cliente);
+        selecionarClienteSelecaoOS(resultado.id_cliente, cliente?.nome || 'Cliente selecionado');
+    } else {
+        document.getElementById('selBuscaCliente').value = agendamento.nome || '';
+        renderizarListaClientesSelecao(agendamento.nome || '');
+    }
+
+    modalSelecaoOS.show();
+}
+
+function renderizarListaClientesSelecao(filtro) {
+    const tbody   = document.getElementById('selListaClientes');
+    const termo   = (filtro || '').trim().toLowerCase();
+    const clientes = (suporte_os_cache?.clientes || [])
+        .filter(c => !termo || c.nome.toLowerCase().includes(termo))
+        .slice(0, 30);
+
+    if (!clientes.length) {
+        tbody.innerHTML = `<tr><td style="padding:12px;color:var(--text-faint);font-size:12px">Nenhum cliente encontrado.</td></tr>`;
+        return;
+    }
+
+    tbody.innerHTML = clientes.map(c => `
+        <tr style="cursor:pointer" onclick="selecionarClienteSelecaoOS(${c.id}, ${JSON.stringify(c.nome)})">
+          <td style="font-size:13px;padding:8px 12px">
+            ${esc(c.nome)}${c.vip ? ' <span class="status-badge status-confirmado">VIP</span>' : ''}
+          </td>
+        </tr>`).join('');
+}
+
+function setupBuscaSelecaoCliente() {
+    document.getElementById('selBuscaCliente').addEventListener('input', e => {
+        clearTimeout(timeout_busca_selecao);
+        const termo = e.target.value;
+        timeout_busca_selecao = setTimeout(() => renderizarListaClientesSelecao(termo), 200);
+    });
+}
+
+function selecionarClienteSelecaoOS(id, nome) {
+    selecao_os_cliente = id;
+
+    document.getElementById('selClienteNomeConfirmado').textContent = nome;
+    document.getElementById('blocoSelecaoCliente').style.display = 'none';
+    document.getElementById('blocoSelecaoVeiculo').style.display  = '';
+    document.getElementById('btnConfirmarSelecaoOS').style.display = '';
+
+    const id_agendamento = document.getElementById('selAgendamentoId').value;
+    const agendamento    = agendamentos_cache.find(a => a.id == id_agendamento) || {};
+
+    const veiculos = (suporte_os_cache?.veiculos_por_cliente || {})[String(id)] || [];
+    const select   = document.getElementById('selVeiculoExistente');
+    select.innerHTML = '<option value="">— Cadastrar veículo novo —</option>' +
+        veiculos.map(v => `<option value="${v.id}">${esc(v.label)}</option>`).join('');
+    select.value = '';
+
+    document.getElementById('selVMarca').value  = agendamento.marca  || '';
+    document.getElementById('selVModelo').value = agendamento.modelo || '';
+    document.getElementById('selVAno').value    = agendamento.ano    || '';
+    document.getElementById('selVCor').value    = '';
+    document.getElementById('selVPlaca').value  = agendamento.placa || '';
+
+    toggleBlocoVeiculoNovo();
+}
+
+function trocarClienteSelecaoOS() {
+    selecao_os_cliente = null;
+    document.getElementById('blocoSelecaoCliente').style.display = '';
+    document.getElementById('blocoSelecaoVeiculo').style.display  = 'none';
+    document.getElementById('btnConfirmarSelecaoOS').style.display = 'none';
+}
+
+function toggleBlocoVeiculoNovo() {
+    const cadastrando_novo = document.getElementById('selVeiculoExistente').value === '';
+    document.getElementById('blocoVeiculoNovo').style.display = cadastrando_novo ? '' : 'none';
+}
+
+async function confirmarSelecaoOS() {
+    if (!selecao_os_cliente) {
+        mostrarErroSelecao('Selecione um cliente.');
+        return;
+    }
+
+    const id_veiculo_existente = document.getElementById('selVeiculoExistente').value;
+    const payload = { id_cliente: selecao_os_cliente };
+
+    if (id_veiculo_existente) {
+        payload.id_veiculo = parseInt(id_veiculo_existente, 10);
+    } else {
+        const marca  = document.getElementById('selVMarca').value.trim();
+        const modelo = document.getElementById('selVModelo').value.trim();
+        const cor    = document.getElementById('selVCor').value.trim();
+        const placa  = document.getElementById('selVPlaca').value.trim();
+
+        if (!marca || !modelo || !cor || !placa) {
+            mostrarErroSelecao('Preencha marca, modelo, cor e placa do veículo, ou escolha um já cadastrado.');
+            return;
+        }
+
+        payload.veiculo_novo = { marca, modelo, cor, placa, ano: document.getElementById('selVAno').value.trim() };
+    }
+
+    const id  = document.getElementById('selAgendamentoId').value;
+    const btn = document.getElementById('btnConfirmarSelecaoOS');
+    btn.disabled = true;
+    esconderErroSelecao();
+
+    try {
+        const dados = await enviarChamadaOS(id, payload);
+        await tratarResultadoChamadaOS(id, dados);
+    } catch (e) {
+        mostrarErroSelecao(e.message);
+    } finally {
+        btn.disabled = false;
+    }
+}
+
+function mostrarErroSelecao(msg) {
+    const el = document.getElementById('vMsgSelecao');
+    document.getElementById('vTxtSelecao').textContent = msg;
+    el.classList.add('show');
+}
+
+function esconderErroSelecao() {
+    document.getElementById('vMsgSelecao').classList.remove('show');
+}
+
 // Exclusão
 
 function confirmarExclusao() {
@@ -396,14 +599,17 @@ function esconderErro() {
 // Boot
 
 document.addEventListener('DOMContentLoaded', () => {
-    modalAg   = new bootstrap.Modal(document.getElementById('mAg'));
-    modalExc  = new bootstrap.Modal(document.getElementById('mExc'));
-    modalNovo = new bootstrap.Modal(document.getElementById('mNovo'));
+    modalAg        = new bootstrap.Modal(document.getElementById('mAg'));
+    modalExc       = new bootstrap.Modal(document.getElementById('mExc'));
+    modalNovo      = new bootstrap.Modal(document.getElementById('mNovo'));
+    modalSelecaoOS = new bootstrap.Modal(document.getElementById('mSelecaoOS'));
 
     document.getElementById('btnConfirmarDelete').addEventListener('click', executarExclusao);
+    document.getElementById('selVeiculoExistente').addEventListener('change', toggleBlocoVeiculoNovo);
 
     setupSidebar();
     setupChips();
     setupBusca();
+    setupBuscaSelecaoCliente();
     carregarAgendamentos();
 });
