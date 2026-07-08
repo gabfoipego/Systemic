@@ -13,6 +13,7 @@ use Automax\Controllers\FornecedorController;
 use Automax\Controllers\EstoqueController;
 use Automax\Controllers\FuncionariosController;
 use Automax\Controllers\ClienteController;
+use Automax\Controllers\ClienteGerenciaController;
 use Automax\Controllers\AgendamentoController;
 use Automax\Controllers\AgendamentoGerenciaController;
 use Automax\Controllers\LogsController;
@@ -51,13 +52,28 @@ function serve_page_with_optional_session(string $base_href, string $file_path):
 
     echo '<base href="' . $base_href . '">';
 
-    $autenticado = !empty($_SESSION['tipo_usuario']) && !empty($_SESSION['cliente_id']);
+    $tipo_usuario = $_SESSION['tipo_usuario'] ?? null;
+    $cliente_logado      = $tipo_usuario === 'cliente' && !empty($_SESSION['cliente_id']);
+    $funcionario_logado  = $tipo_usuario === 'funcionario' && !empty($_SESSION['funcionario_id']);
 
-    if ($autenticado) {
+    if ($cliente_logado) {
         $user_data = [
             'tipo'       => 'cliente',
             'nome'       => $_SESSION['cliente_nome'] ?? '',
             'iniciais'   => build_user_initials($_SESSION['cliente_nome'] ?? ''),
+            'permissoes' => AccessControl::permissoes_do_nivel('cliente'),
+            'csrf_token' => $_SESSION['csrf_token'] ?? '',
+        ];
+        $safe_json = json_encode($user_data, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP);
+        echo "<script>window.__session_user = {$safe_json};</script>";
+    } elseif ($funcionario_logado) {
+        $nivel = $_SESSION['nivel_de_acesso'] ?? '';
+        $user_data = [
+            'tipo'       => 'funcionario',
+            'nome'       => $_SESSION['funcionario_nome'] ?? '',
+            'nivel'      => $nivel,
+            'iniciais'   => build_user_initials($_SESSION['funcionario_nome'] ?? ''),
+            'permissoes' => AccessControl::permissoes_do_nivel($nivel),
             'csrf_token' => $_SESSION['csrf_token'] ?? '',
         ];
         $safe_json = json_encode($user_data, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP);
@@ -165,11 +181,11 @@ $router->post('/auth/logout', function () {
 });
 
 $router->get('/busca', function () {
-    serve_page('/pages/busca/', __DIR__ . '/pages/busca/busca.html');
+    serve_page_with_optional_session('/pages/busca/', __DIR__ . '/pages/busca/busca.html');
 });
 
 $router->get('/servicos', function () {
-    serve_page('/pages/servicos/', __DIR__ . '/pages/servicos/servicos.html');
+    serve_page_with_optional_session('/pages/servicos/', __DIR__ . '/pages/servicos/servicos.html');
 });
 
 $router->get('/cadastro', function () {
@@ -247,6 +263,11 @@ $router->get('/funcionarios', function () {
     serve_protected_page('/pages/funcionarios/', __DIR__ . '/pages/funcionarios/funcionarios.html');
 });
 
+$router->get('/clientes', function () {
+    AccessControl::exigir_permissao('clientes.gerenciar');
+    serve_protected_page('/pages/clientes/', __DIR__ . '/pages/clientes/clientes.html');
+});
+
 $router->get('/agendamentos', function () {
     AccessControl::exigir_permissao('agendamentos.visualizar');
     serve_protected_page('/pages/agendamentos/', __DIR__ . '/pages/agendamentos/agendamentos.html');
@@ -266,7 +287,7 @@ $router->get('/carrinho', function () {
     AccessControl::exigir_cliente();
     serve_protected_page('/pages/carrinho/', __DIR__ . '/pages/carrinho/carrinho.html');
 });
- 
+
 
 
 // API de ordens de serviço
@@ -395,6 +416,28 @@ $router->delete('/api/funcionarios/:id', function (array $params) {
     FuncionariosController::deletar($params);
 });
 
+// API de gestão de clientes (gerente)
+
+$router->get('/api/clientes', function () {
+    ClienteGerenciaController::listar();
+});
+
+$router->get('/api/clientes/:id', function (array $params) {
+    ClienteGerenciaController::buscar($params);
+});
+
+$router->post('/api/clientes', function () {
+    ClienteGerenciaController::criar();
+});
+
+$router->patch('/api/clientes/:id', function (array $params) {
+    ClienteGerenciaController::atualizar($params);
+});
+
+$router->delete('/api/clientes/:id', function (array $params) {
+    ClienteGerenciaController::deletar($params);
+});
+
 // API de veículos e agendamentos (área do cliente)
 
 $router->get('/api/veiculos', function () {
@@ -510,7 +553,7 @@ $router->get('/uploads/avatars/:arquivo', function (array $params) {
     exit;
 });
 
-// Dispatch
+// Dispatch hehe
 
 try {
     $router->dispatch($_SERVER['REQUEST_URI'], $_SERVER['REQUEST_METHOD']);

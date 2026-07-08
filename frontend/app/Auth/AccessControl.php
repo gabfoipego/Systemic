@@ -19,6 +19,7 @@ class AccessControl
             'clientes.visualizar',
             'clientes.cadastrar',
             'clientes.editar',
+            'clientes.gerenciar',
 
             'estoque.visualizar',
             'estoque.editar',

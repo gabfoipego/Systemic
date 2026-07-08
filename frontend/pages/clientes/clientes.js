@@ -1,24 +1,28 @@
 /**
- * funcionarios.js
+ * clientes.js
  *
  * Responsabilidades:
- *  1. Listar funcionários com busca, filtro de nível e paginação
- *  2. Criar e editar funcionários via modal
- *  3. Remover funcionário com confirmação
+ *  1. Listar clientes com busca, filtro de status VIP e paginação
+ *  2. Criar e editar clientes via modal (incluindo alternar VIP)
+ *  3. Remover cliente com confirmação
+ *
+ * Acesso restrito ao gerente — a rota /clientes e as chamadas de
+ * /api/clientes já são bloqueadas no backend pela permissão
+ * 'clientes.gerenciar'; aqui só ajustamos a interface.
  */
 
 const user        = window.__session_user || {};
 const csrf        = user.csrf_token || '';
-const pode_editar = (user.permissoes || []).includes('funcionarios.gerenciar');
+const pode_editar = (user.permissoes || []).includes('clientes.gerenciar');
 
 let pagina_atual  = 1;
 let total_paginas = 1;
-let nivel_atual   = '';
+let vip_atual     = '';
 let busca_atual   = '';
 let timeout_busca = null;
 let id_excluindo  = null;
 
-let modalFunc, modalExc;
+let modalCli, modalExc;
 
 // Sidebar
 
@@ -88,50 +92,59 @@ function iniciais_do_nome(nome) {
     return (first !== last ? first + last : first).toUpperCase();
 }
 
+// Máscaras de exibição
+
+function formatar_cpf(cpf) {
+    const d = String(cpf ?? '').replace(/\D/g, '');
+    if (d.length !== 11) return cpf ?? '';
+    return `${d.slice(0,3)}.${d.slice(3,6)}.${d.slice(6,9)}-${d.slice(9,11)}`;
+}
+
 // Carregamento
 
-async function carregarFuncionarios(pagina = 1) {
+async function carregarClientes(pagina = 1) {
     pagina_atual = pagina;
 
-    const params = new URLSearchParams({ pagina, nivel: nivel_atual, busca: busca_atual });
+    const params = new URLSearchParams({ pagina, vip: vip_atual, busca: busca_atual });
 
     try {
-        const res   = await fetch(`/api/funcionarios?${params}`, { credentials: 'same-origin' });
+        const res   = await fetch(`/api/clientes?${params}`, { credentials: 'same-origin' });
         const dados = await res.json();
 
         if (!res.ok) throw new Error(dados.erro || 'Erro ao carregar.');
 
-        renderTabela(dados.funcionarios || []);
+        renderTabela(dados.clientes || []);
         renderPaginacao(dados.pagina, dados.total_paginas);
         document.getElementById('countLabel').textContent =
-            `${dados.total ?? 0} funcionário${dados.total !== 1 ? 's' : ''}`;
+            `${dados.total ?? 0} cliente${dados.total !== 1 ? 's' : ''}`;
 
     } catch (e) {
-        document.getElementById('tbodyFuncionarios').innerHTML =
-            `<tr><td colspan="5"><div class="empty"><i class="bi bi-exclamation-triangle" aria-hidden="true"></i><h4>Erro ao carregar funcionários</h4></div></td></tr>`;
+        document.getElementById('tbodyClientes').innerHTML =
+            `<tr><td colspan="6"><div class="empty"><i class="bi bi-exclamation-triangle" aria-hidden="true"></i><h4>Erro ao carregar clientes</h4></div></td></tr>`;
         toast(e.message, 'erro');
     }
 }
 
-function renderTabela(funcionarios) {
-    const tbody = document.getElementById('tbodyFuncionarios');
+function renderTabela(clientes) {
+    const tbody = document.getElementById('tbodyClientes');
 
-    if (!funcionarios.length) {
-        tbody.innerHTML = `<tr><td colspan="5"><div class="empty"><i class="bi bi-people" aria-hidden="true"></i><h4>Nenhum funcionário encontrado</h4></div></td></tr>`;
+    if (!clientes.length) {
+        tbody.innerHTML = `<tr><td colspan="6"><div class="empty"><i class="bi bi-people" aria-hidden="true"></i><h4>Nenhum cliente encontrado</h4></div></td></tr>`;
         return;
     }
 
-    tbody.innerHTML = funcionarios.map(f => {
-        const av_class  = `func-av av-${esc(f.nivel)}`;
-        const ini       = esc(iniciais_do_nome(f.nome));
-        const nivel_cls = `nivel-badge nivel-${esc(f.nivel)}`;
-        const nivel_txt = label_nivel(f.nivel);
+    tbody.innerHTML = clientes.map(c => {
+        const av_class = `cli-av${c.vip ? ' vip' : ''}`;
+        const ini      = esc(iniciais_do_nome(c.nome));
+        const status   = c.vip
+            ? `<span class="vip-badge"><i class="bi bi-star-fill" aria-hidden="true"></i>VIP</span>`
+            : `<span style="font-family:var(--font-mono);font-size:11px;color:var(--text-faint)">Padrão</span>`;
 
         const acoes = pode_editar
-            ? `<button class="icon-btn" onclick="abrirModalEditar(${f.id})" title="Editar" aria-label="Editar ${esc(f.nome)}">
+            ? `<button class="icon-btn" onclick="abrirModalEditar(${c.id})" title="Editar" aria-label="Editar ${esc(c.nome)}">
                  <i class="bi bi-pencil" aria-hidden="true"></i>
                </button>
-               <button class="icon-btn" onclick="confirmarExclusao(${f.id}, '${ini}')" title="Remover" aria-label="Remover ${esc(f.nome)}" style="color:var(--rose)">
+               <button class="icon-btn" onclick="confirmarExclusao(${c.id}, '${ini}')" title="Remover" aria-label="Remover ${esc(c.nome)}" style="color:var(--rose)">
                  <i class="bi bi-person-x" aria-hidden="true"></i>
                </button>`
             : '—';
@@ -139,16 +152,13 @@ function renderTabela(funcionarios) {
         return `
           <tr>
             <td><div class="${av_class}">${ini}</div></td>
-            <td style="font-weight:600;color:var(--off-white)">${esc(f.nome)}</td>
-            <td style="font-family:var(--font-mono);font-size:12px;color:var(--text-dim)">${esc(f.email)}</td>
-            <td><span class="${nivel_cls}">${nivel_txt}</span></td>
+            <td style="font-weight:600;color:var(--off-white)">${esc(c.nome)}</td>
+            <td style="font-family:var(--font-mono);font-size:12px;color:var(--text-dim)">${esc(c.email)}</td>
+            <td style="font-family:var(--font-mono);font-size:12px;color:var(--text-dim)">${esc(c.celular)}</td>
+            <td>${status}</td>
             <td style="display:flex;gap:4px">${acoes}</td>
           </tr>`;
     }).join('');
-}
-
-function label_nivel(nivel) {
-    return { gerente: 'Gerente', mecanico: 'Mecânico', recepcao: 'Recepção' }[nivel] ?? nivel;
 }
 
 function renderPaginacao(pagina, total) {
@@ -158,25 +168,25 @@ function renderPaginacao(pagina, total) {
     if (total <= 1) { el.innerHTML = ''; return; }
 
     const btns = [];
-    btns.push(`<button class="pb" ${pagina <= 1 ? 'disabled' : ''} onclick="carregarFuncionarios(${pagina - 1})" aria-label="Página anterior"><i class="bi bi-chevron-left"></i></button>`);
+    btns.push(`<button class="pb" ${pagina <= 1 ? 'disabled' : ''} onclick="carregarClientes(${pagina - 1})" aria-label="Página anterior"><i class="bi bi-chevron-left"></i></button>`);
 
     for (let i = 1; i <= total; i++) {
-        btns.push(`<button class="pb ${i === pagina ? 'active' : ''}" onclick="carregarFuncionarios(${i})" aria-label="Página ${i}" ${i === pagina ? 'aria-current="page"' : ''}>${i}</button>`);
+        btns.push(`<button class="pb ${i === pagina ? 'active' : ''}" onclick="carregarClientes(${i})" aria-label="Página ${i}" ${i === pagina ? 'aria-current="page"' : ''}>${i}</button>`);
     }
 
-    btns.push(`<button class="pb" ${pagina >= total ? 'disabled' : ''} onclick="carregarFuncionarios(${pagina + 1})" aria-label="Próxima página"><i class="bi bi-chevron-right"></i></button>`);
+    btns.push(`<button class="pb" ${pagina >= total ? 'disabled' : ''} onclick="carregarClientes(${pagina + 1})" aria-label="Próxima página"><i class="bi bi-chevron-right"></i></button>`);
     el.innerHTML = `<div class="pag-btns">${btns.join('')}</div>`;
 }
 
 // Filtros de chip
 
 function setupChips() {
-    document.querySelectorAll('[data-nivel]').forEach(btn => {
+    document.querySelectorAll('[data-vip]').forEach(btn => {
         btn.addEventListener('click', () => {
-            document.querySelectorAll('[data-nivel]').forEach(b => b.classList.remove('ativo'));
+            document.querySelectorAll('[data-vip]').forEach(b => b.classList.remove('ativo'));
             btn.classList.add('ativo');
-            nivel_atual = btn.dataset.nivel;
-            carregarFuncionarios(1);
+            vip_atual = btn.dataset.vip;
+            carregarClientes(1);
         });
     });
 }
@@ -188,7 +198,7 @@ function setupBusca() {
         clearTimeout(timeout_busca);
         timeout_busca = setTimeout(() => {
             busca_atual = e.target.value.trim();
-            carregarFuncionarios(1);
+            carregarClientes(1);
         }, 350);
     });
 }
@@ -196,36 +206,40 @@ function setupBusca() {
 // Modal: criar novo
 
 function abrirModalNovo() {
-    document.getElementById('mTit').textContent         = 'Novo Funcionário';
-    document.getElementById('funcId').value             = '';
+    document.getElementById('mTit').textContent         = 'Novo Cliente';
+    document.getElementById('cliId').value              = '';
     document.getElementById('inputNome').value          = '';
+    document.getElementById('inputCpf').value           = '';
+    document.getElementById('inputCelular').value       = '';
     document.getElementById('inputEmail').value         = '';
-    document.getElementById('inputNivel').value         = '';
     document.getElementById('inputSenha').value         = '';
     document.getElementById('inputSenha').required      = true;
     document.getElementById('senhaOpcional').style.display = 'none';
+    document.getElementById('inputVip').checked         = false;
     esconderErro();
-    modalFunc.show();
+    modalCli.show();
 }
 
 // Modal: editar existente
 
 async function abrirModalEditar(id) {
     try {
-        const res   = await fetch(`/api/funcionarios/${id}`, { credentials: 'same-origin' });
+        const res   = await fetch(`/api/clientes/${id}`, { credentials: 'same-origin' });
         const dados = await res.json();
         if (!res.ok) throw new Error(dados.erro || 'Erro ao carregar.');
 
-        document.getElementById('mTit').textContent         = 'Editar Funcionário';
-        document.getElementById('funcId').value             = dados.id;
+        document.getElementById('mTit').textContent         = 'Editar Cliente';
+        document.getElementById('cliId').value              = dados.id;
         document.getElementById('inputNome').value          = dados.nome;
+        document.getElementById('inputCpf').value           = formatar_cpf(dados.cpf);
+        document.getElementById('inputCelular').value       = dados.celular;
         document.getElementById('inputEmail').value         = dados.email;
-        document.getElementById('inputNivel').value         = dados.nivel;
         document.getElementById('inputSenha').value         = '';
         document.getElementById('inputSenha').required      = false;
         document.getElementById('senhaOpcional').style.display = '';
+        document.getElementById('inputVip').checked         = !!dados.vip;
         esconderErro();
-        modalFunc.show();
+        modalCli.show();
     } catch (e) {
         toast(e.message, 'erro');
     }
@@ -233,19 +247,21 @@ async function abrirModalEditar(id) {
 
 // Salvar (criar ou editar)
 
-async function salvarFuncionario() {
-    const id    = document.getElementById('funcId').value;
-    const nome  = document.getElementById('inputNome').value.trim();
-    const email = document.getElementById('inputEmail').value.trim();
-    const nivel = document.getElementById('inputNivel').value;
-    const senha = document.getElementById('inputSenha').value;
+async function salvarCliente() {
+    const id      = document.getElementById('cliId').value;
+    const nome    = document.getElementById('inputNome').value.trim();
+    const cpf     = document.getElementById('inputCpf').value.trim();
+    const celular = document.getElementById('inputCelular').value.trim();
+    const email   = document.getElementById('inputEmail').value.trim();
+    const senha   = document.getElementById('inputSenha').value;
+    const vip     = document.getElementById('inputVip').checked;
 
-    if (!nome || !email || !nivel) {
+    if (!nome || !cpf || !celular || !email) {
         mostrarErro('Preencha todos os campos obrigatórios.');
         return;
     }
     if (!id && !senha) {
-        mostrarErro('Informe uma senha para o novo funcionário.');
+        mostrarErro('Informe uma senha para o novo cliente.');
         return;
     }
     if (senha && senha.length < 8) {
@@ -253,11 +269,11 @@ async function salvarFuncionario() {
         return;
     }
 
-    const payload = { nome, email, nivel, csrf_token: csrf };
+    const payload = { nome, cpf, celular, email, vip, csrf_token: csrf };
     if (senha) payload.senha = senha;
 
-    const metodo = id ? 'PUT' : 'POST';
-    const url    = id ? `/api/funcionarios/${id}` : '/api/funcionarios';
+    const metodo = id ? 'PATCH' : 'POST';
+    const url    = id ? `/api/clientes/${id}` : '/api/clientes';
 
     const btn = document.getElementById('btnSalvar');
     btn.disabled = true;
@@ -272,9 +288,9 @@ async function salvarFuncionario() {
         const dados = await res.json();
         if (!res.ok) throw new Error(dados.erro || 'Erro ao salvar.');
 
-        modalFunc.hide();
-        toast(id ? 'Funcionário atualizado.' : 'Funcionário criado.', 'ok');
-        carregarFuncionarios(pagina_atual);
+        modalCli.hide();
+        toast(id ? 'Cliente atualizado.' : 'Cliente criado.', 'ok');
+        carregarClientes(pagina_atual);
     } catch (e) {
         mostrarErro(e.message);
     } finally {
@@ -297,7 +313,7 @@ async function executarExclusao() {
     btn.disabled = true;
 
     try {
-        const res   = await fetch(`/api/funcionarios/${id_excluindo}`, {
+        const res   = await fetch(`/api/clientes/${id_excluindo}`, {
             method:      'DELETE',
             credentials: 'same-origin',
             headers:     { 'Content-Type': 'application/json' },
@@ -307,8 +323,8 @@ async function executarExclusao() {
         if (!res.ok) throw new Error(dados.erro || 'Erro ao remover.');
 
         modalExc.hide();
-        toast('Funcionário removido.', 'ok');
-        carregarFuncionarios(pagina_atual);
+        toast('Cliente removido.', 'ok');
+        carregarClientes(pagina_atual);
     } catch (e) {
         toast(e.message, 'erro');
     } finally {
@@ -329,7 +345,7 @@ function esconderErro() {
     document.getElementById('vMsg').classList.remove('show');
 }
 
-// Chip helper (mesma classe usada em estoque.js)
+// Chip helper (mesma classe usada em funcionarios.js / estoque.js)
 
 (function injetarChipStyle() {
     if (document.querySelector('style[data-chip]')) return;
@@ -360,13 +376,13 @@ function esconderErro() {
 // Boot
 
 document.addEventListener('DOMContentLoaded', () => {
-    modalFunc = new bootstrap.Modal(document.getElementById('mFunc'));
-    modalExc  = new bootstrap.Modal(document.getElementById('mExc'));
+    modalCli = new bootstrap.Modal(document.getElementById('mCli'));
+    modalExc = new bootstrap.Modal(document.getElementById('mExc'));
 
     document.getElementById('btnConfirmarDelete').addEventListener('click', executarExclusao);
 
     setupSidebar();
     setupChips();
     setupBusca();
-    carregarFuncionarios();
+    carregarClientes();
 });

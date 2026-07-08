@@ -50,6 +50,9 @@
         <a href="/fornecedores" class="nav-item active rnav r-g" aria-current="page" aria-label="Fornecedores">
         <i class="bi bi-truck" aria-hidden="true"></i>Fornecedores
         </a>
+        <a href="/clientes" class="nav-item rnav r-c" aria-label="Clientes">
+        <i class="bi bi-people" aria-hidden="true"></i>Clientes
+        </a>
         <a href="/funcionarios" class="nav-item rnav r-g" aria-label="Funcionários">
         <i class="bi bi-person-badge" aria-hidden="true"></i>Funcionários
         </a>
@@ -238,6 +241,10 @@ function setupSidebar() {
   const eh_mecanico_ou_mais = perms.includes('estoque.visualizar');
   document.querySelectorAll('.rnav.r-m').forEach(el => {
     if (!eh_mecanico_ou_mais) el.style.display = 'none';
+  });
+  const pode_ver_clientes = perms.includes('clientes.gerenciar');
+  document.querySelectorAll('.rnav.r-c').forEach(el => {
+    if (!pode_ver_clientes) el.style.display = 'none';
   });
 }
 
