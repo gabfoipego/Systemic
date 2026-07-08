@@ -16,6 +16,7 @@ use Automax\Controllers\ClienteController;
 use Automax\Controllers\ClienteGerenciaController;
 use Automax\Controllers\AgendamentoController;
 use Automax\Controllers\AgendamentoGerenciaController;
+use Automax\Controllers\AgendamentoConversaoController;
 use Automax\Controllers\LogsController;
 use Automax\Controllers\OrdemController;
 use Automax\Controllers\ProdutoNotFoundException;
@@ -482,6 +483,10 @@ $router->post('/api/agendamentos/gerenciar', function () {
 
 $router->patch('/api/agendamentos/:id/status', function (array $params) {
     AgendamentoGerenciaController::atualizar_status($params);
+});
+
+$router->post('/api/agendamentos/:id/chamar-os', function (array $params) {
+    AgendamentoConversaoController::chamar_os($params);
 });
 
 $router->delete('/api/agendamentos/:id', function (array $params) {
