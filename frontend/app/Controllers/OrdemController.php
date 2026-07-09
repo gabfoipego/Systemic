@@ -9,6 +9,7 @@ use Automax\Config\DatabaseException;
 use Automax\Auth\AccessControl;
 use Automax\Support\Validador;
 use Automax\Support\ErroValidacao;
+use Automax\Support\Logger;
 
 class OrdemController
 {

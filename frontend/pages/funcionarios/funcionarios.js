@@ -256,7 +256,7 @@ async function salvarFuncionario() {
     const payload = { nome, email, nivel, csrf_token: csrf };
     if (senha) payload.senha = senha;
 
-    const metodo = id ? 'PUT' : 'POST';
+    const metodo = id ? 'PATCH' : 'POST';
     const url    = id ? `/api/funcionarios/${id}` : '/api/funcionarios';
 
     const btn = document.getElementById('btnSalvar');
