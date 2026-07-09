@@ -659,14 +659,14 @@ function renderPecas() {
           <td style="padding:6px 8px">
             <input class="inp" style="padding:6px 10px;font-size:12px;width:70px" type="number"
               value="${p.qtd}" min="1"
-              oninput="pecasT[${i}].qtd=parseInt(this.value)||1;calcOrc()"
+              oninput="pecasT[${i}].qtd=Math.max(1,parseInt(this.value)||1);calcOrc()"
               aria-label="Quantidade da peça ${i+1}" />
           </td>
           <td style="padding:6px 8px">
             <input class="inp" style="padding:6px 10px;font-size:12px;width:110px" type="number"
               id="peca-valor-${i}"
               value="${p.valor}" min="0" step="0.01"
-              oninput="pecasT[${i}].valor=parseFloat(this.value)||0;calcOrc()"
+              oninput="pecasT[${i}].valor=Math.max(0,parseFloat(this.value)||0);calcOrc()"
               aria-label="Valor unitário da peça ${i+1}" />
           </td>
           <td style="padding:6px 10px;font-family:var(--font-mono);font-size:12px;color:var(--green)">${fc(p.valor * p.qtd)}</td>
@@ -722,7 +722,9 @@ async function buscarPecasFlowgate(indice, termo) {
     dropdown.innerHTML = data.pecas.map(p => `
       <li role="option"
           style="padding:8px 12px;cursor:pointer;font-size:12px;border-bottom:1px solid var(--border-subtle)"
-          onmousedown="selecionarPeca(${indice}, ${JSON.stringify(esc(p.nome))}, ${p.preco})"
+          data-nome="${esc(p.nome)}"
+          data-preco="${p.preco}"
+          onmousedown="selecionarPecaEl(${indice}, this)"
           title="${esc(p.sku)} · ${esc(p.fornecedora.nome)}">
         <div style="font-weight:500;color:var(--text-primary)">${esc(p.nome)}</div>
         <div style="color:var(--text-faint);font-size:11px;font-family:var(--font-mono)">
@@ -736,6 +738,12 @@ async function buscarPecasFlowgate(indice, termo) {
     dropdown.innerHTML = '<li style="padding:8px 12px;font-size:12px;color:var(--rose)">Catálogo indisponível.</li>';
     dropdown.style.display = 'block';
   }
+}
+
+function selecionarPecaEl(indice, el) {
+  const nome  = el.dataset.nome  || '';
+  const preco = parseFloat(el.dataset.preco) || 0;
+  selecionarPeca(indice, nome, preco);
 }
 
 function selecionarPeca(indice, nome, preco) {
