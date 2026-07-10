@@ -41,24 +41,52 @@ class Database
 
     public function query(string $sql, array $params = []): array
     {
-        $stmt = $this->connection->prepare($sql);
-        $stmt->execute($params);
+        $stmt = $this->preparar_com_tipos($sql, $params);
+        $stmt->execute();
         return $stmt->fetchAll();
     }
 
     public function query_one(string $sql, array $params = []): ?array
     {
-        $stmt = $this->connection->prepare($sql);
-        $stmt->execute($params);
+        $stmt = $this->preparar_com_tipos($sql, $params);
+        $stmt->execute();
         $row = $stmt->fetch();
         return $row !== false ? $row : null;
     }
 
     public function execute(string $sql, array $params = []): int
     {
-        $stmt = $this->connection->prepare($sql);
-        $stmt->execute($params);
+        $stmt = $this->preparar_com_tipos($sql, $params);
+        $stmt->execute();
         return $stmt->rowCount();
+    }
+
+    /**
+     * Prepara a query e vincula cada parâmetro com o tipo PDO correto.
+     *
+     * Necessário porque, com PDO::ATTR_EMULATE_PREPARES desligado, um
+     * execute($params) simples vincula tudo como PDO::PARAM_STR — e o
+     * driver mysqlnd exige inteiro nativo em cláusulas como
+     * "LIMIT :limite OFFSET :offset". Sem isso, toda query paginada
+     * (ex: GET /api/pecas) falha com um PDOException e cai no catch
+     * genérico do endpoint, virando um 500 sem pista nenhuma do motivo.
+     */
+    private function preparar_com_tipos(string $sql, array $params): PDOStatement
+    {
+        $stmt = $this->connection->prepare($sql);
+
+        foreach ($params as $nome => $valor) {
+            $tipo = match (true) {
+                is_int($valor)  => PDO::PARAM_INT,
+                is_bool($valor) => PDO::PARAM_BOOL,
+                is_null($valor) => PDO::PARAM_NULL,
+                default         => PDO::PARAM_STR,
+            };
+
+            $stmt->bindValue($nome, $valor, $tipo);
+        }
+
+        return $stmt;
     }
 
     public function last_insert_id(): string
