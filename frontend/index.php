@@ -562,7 +562,9 @@ $router->get('/uploads/avatars/:arquivo', function (array $params) {
 
 try {
     $router->dispatch($_SERVER['REQUEST_URI'], $_SERVER['REQUEST_METHOD']);
-} catch (Exception $e) {
+} catch (Throwable $e) {
+    error_log('[index.php] ' . get_class($e) . ': ' . $e->getMessage() . ' in ' . $e->getFile() . ':' . $e->getLine());
     http_response_code(500);
-    echo $e->getMessage();
+    header('Content-Type: application/json; charset=UTF-8');
+    echo json_encode(['erro' => 'Erro interno. Verifique os logs do servidor.']);
 }
