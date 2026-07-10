@@ -26,6 +26,8 @@ function init_user_display() {
     const user   = window.__session_user || {};
     const estilo = nivel_para_estilo[user.nivel] ?? nivel_para_estilo.mecanico;
 
+    document.getElementById('csrfLogout').value = user.csrf_token || '';
+
     const av = document.getElementById('sbAv');
     av.textContent = user.iniciais || '?';
     av.className   = 'av ' + (user.nivel ? estilo.av : '');
