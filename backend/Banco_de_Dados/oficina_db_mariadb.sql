@@ -294,6 +294,24 @@ CREATE TABLE IF NOT EXISTS agendamentos (
     PRIMARY KEY (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+CREATE TABLE IF NOT EXISTS produto_peca_origem (
+    id_produto INT NOT NULL,
+    id_peca    INT NOT NULL,
+    PRIMARY KEY (id_produto),
+    CONSTRAINT fk_ppo_produto
+        FOREIGN KEY (id_produto)
+        REFERENCES produtos (id_produto)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE,
+    CONSTRAINT fk_ppo_peca
+        FOREIGN KEY (id_peca)
+        REFERENCES pecas (id_peca)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
+) ENGINE=InnoDB
+  DEFAULT CHARSET=utf8mb4
+  COLLATE=utf8mb4_unicode_ci;
+
 -- Reativa verificações de chave estrangeira
 SET FOREIGN_KEY_CHECKS = 1;
 

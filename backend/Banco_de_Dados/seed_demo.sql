@@ -118,12 +118,12 @@ VALUES
     -- Ordem "andamento" (troca de óleo)
     (
         (SELECT id_ordem FROM ordem WHERE tipo_ordem = 'Troca de óleo e filtros' LIMIT 1),
-        (SELECT id_produto FROM produtos WHERE nome = 'Óleo Motor 5W-30 Sintético 1L'),
+        (SELECT id_peca FROM pecas WHERE nome_peca = 'Óleo Motor 5W-30 Sintético 1L'),
         'Óleo Motor 5W-30 Sintético 1L', 4, 69.90
     ),
     (
         (SELECT id_ordem FROM ordem WHERE tipo_ordem = 'Troca de óleo e filtros' LIMIT 1),
-        (SELECT id_produto FROM produtos WHERE nome = 'Filtro de Óleo Universal'),
+        (SELECT id_peca FROM pecas WHERE nome_peca = 'Filtro de Óleo Universal'),
         'Filtro de Óleo Universal', 1, 35.50
     ),
     -- Ordem "aguardando" (bateria) — peça do catálogo Flowgate, sem vínculo local
@@ -134,13 +134,13 @@ VALUES
     -- Ordem "concluida" (freios)
     (
         (SELECT id_ordem FROM ordem WHERE tipo_ordem = 'Freios' LIMIT 1),
-        (SELECT id_produto FROM produtos WHERE nome = 'Pastilha de Freio Dianteira'),
+        (SELECT id_peca FROM pecas WHERE nome_peca = 'Pastilha de Freio Dianteira'),
         'Pastilha de Freio Dianteira', 1, 98.00
     ),
     -- Ordem "atrasada" (correia dentada)
     (
         (SELECT id_ordem FROM ordem WHERE tipo_ordem = 'Correia dentada' LIMIT 1),
-        (SELECT id_produto FROM produtos WHERE nome = 'Kit Correia Dentada + Tensor'),
+        (SELECT id_peca FROM pecas WHERE nome_peca = 'Kit Correia Dentada + Tensor'),
         'Kit Correia Dentada + Tensor', 1, 145.00
     );
 
